@@ -1,4 +1,4 @@
-import bpy, os
+import bpy, os, json
 
 class AttenRen:
     def __init__(self):
@@ -40,8 +40,14 @@ class AttenRen:
             ...,
         }
         """
-        # self.settings = {"collVisibility":True, "objVisibility": True, "missingFiles":True}
-        self.settings = None
+        # settingFilePath = os.path.join(os.path.dirname(__file__), "attenrenSettings.txt")
+        # if os.path.exists(settingFilePath):
+        #     with open(settingFilePath, encoding='utf-8') as f:
+        #         scene = bpy.context.scene
+        #         settings = json.load(f)
+        #         for key, val in settings.items():
+        #             setattr(scene, key, val) 
+
     def clearRenderRegion(self, renderSettings):
         renderSettings.border_max_x = 1.
         renderSettings.border_max_y = 1.
@@ -222,3 +228,28 @@ class AttenRen:
                                 coll.collection.hide_viewport = True
                             else:
                                 coll.hide_viewport = coll.collection.hide_viewport = False
+
+    def saveSettings(self):
+        settingFilePath = os.path.join(os.path.dirname(__file__), "attenrenSettings.txt")
+        # if not os.path.exists(settingFilePath):
+        types = bpy.types.Scene
+        scene = bpy.context.scene
+        settings = {
+            types.attenRen_settings_collVisibility.keywords["attr"]: scene.attenRen_settings_collVisibility,
+            types.attenRen_settings_objVisibility.keywords["attr"]: scene.attenRen_settings_objVisibility,
+            types.attenRen_settings_missingFiles.keywords["attr"]: scene.attenRen_settings_missingFiles,
+            types.attenRen_settings_renderRegion.keywords["attr"]: scene.attenRen_settings_renderRegion,
+            types.attenRen_settings_resolutionPercentage.keywords["attr"]: scene.attenRen_settings_resolutionPercentage,
+            types.attenRen_settings_samples.keywords["attr"]: scene.attenRen_settings_samples,
+            types.attenRen_settings_instance.keywords["attr"]: scene.attenRen_settings_instance,
+            types.attenRen_settings_modifiers.keywords["attr"]: scene.attenRen_settings_modifiers,
+            types.attenRen_settings_composite.keywords["attr"]: scene.attenRen_settings_composite,
+            types.attenRen_settings_particleShowEmitter.keywords["attr"]: scene.attenRen_settings_particleShowEmitter,
+            types.attenRen_settings_particleChildAmount.keywords["attr"]: scene.attenRen_settings_particleChildAmount,
+            types.attenRen_settings_particleDisplayPercentage.keywords["attr"]: scene.attenRen_settings_particleDisplayPercentage,
+            types.attenRen_settings_gpencilModifiers.keywords["attr"]: scene.attenRen_settings_gpencilModifiers,
+            types.attenRen_settings_gpencilShaderEffects.keywords["attr"]: scene.attenRen_settings_gpencilShaderEffects,
+            types.attenRen_settings_autoCheck.keywords["attr"]: scene.attenRen_settings_autoCheck
+        }
+        with open(settingFilePath, 'w', encoding='utf-8', newline='\n') as fp:
+            json.dump(settings, fp, indent=2)

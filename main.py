@@ -19,7 +19,11 @@ class ATTENREN_OT_Check(bpy.types.Operator):
         context.scene.attenRen.visibiDiff.clear()
         context.scene.attenRen.missingFiles.clear()
         context.scene.attenRen.check()
+        bpy.context.window_manager.invoke_popup(self)
         return {'FINISHED'}
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="メッセージ")
 
 class ATTENREN_OT_SetObjHide(bpy.types.Operator):
     bl_idname = "attenren.set_obj_hide"
@@ -45,21 +49,6 @@ class ATTENREN_OT_SetObjHide(bpy.types.Operator):
         obj = context.scene.objects[self.objName]
         obj.hide_set(not obj.hide_get())
         return {'FINISHED'}
-
-# class ATTENREN_OT_SetCollHide(bpy.types.Operator):
-#     bl_idname = "attenren.set_coll_hide"
-#     bl_label = "Toggle Collection"
-#     bl_description = bpy.app.translations.pgettext("Toggle Visibility")
-#     bl_options = {'REGISTER', 'UNDO'}
-
-#     collName: StringProperty(
-#         name="collName",
-#         options={"HIDDEN"},
-#     )
-#     def execute(self, context):
-#         coll = bpy.context.view_layer.layer_collection.children.get(self.collName).hide_viewport
-#         coll = not coll
-#         return {'FINISHED'}
 
 class ATTENREN_OT_MatchVisibility(bpy.types.Operator):
     bl_idname = "attenren.match_visibility"
@@ -350,22 +339,23 @@ class ATTENREN_PT_Menu_Settings(AttenRenPanel, bpy.types.Panel):
         row = box.row()
         row.alignment = "LEFT"
         row.prop(context.scene, "attenRen_settings_composite")
-        row.label(text=bpy.app.translations.pgettext("(Alpha Ver.)"))
+        row.label(text=bpy.app.translations.pgettext("(α Ver.)"))
 
         box.label(text=bpy.app.translations.pgettext("Particles"))
         row = box.row()
-        row.separator(factor=2)
+        row.separator(factor=1)
         row.prop(context.scene, "attenRen_settings_particleShowEmitter")
         row = box.row()
-        row.separator(factor=2)
+        row.separator(factor=1)
         row.prop(context.scene, "attenRen_settings_particleChildAmount")
         row = box.row()
-        row.separator(factor=2)
+        row.separator(factor=1)
         row.prop(context.scene, "attenRen_settings_particleDisplayPercentage")
         box.label(text=bpy.app.translations.pgettext("Grease Pencil"))
         row = box.row()
-        row.separator(factor=2)
+        row.separator(factor=1)
         row.prop(context.scene, "attenRen_settings_gpencilModifiers")
         row = box.row()
-        row.separator(factor=2)
+        row.separator(factor=1)
         row.prop(context.scene, "attenRen_settings_gpencilShaderEffects")
+        layout.prop(context.scene, "attenRen_settings_autoCheck")

@@ -20,6 +20,11 @@ translationDict = {
         ("*", "Check These Statues") : "Check These Statues",
         ("*", "Collections Visibiiity") : "Collections Visibiiity",
         ("*", "Objects Visibiiity") : "Objects Visibiiity",
+        ("*", "Auto Check before Render") : "Auto Check before Render",
+        ("*", "Run AttentiveRendering Check Automatically before Rendering. (Modify Nothing, Just Check and Report in Status Bar)") : "Run AttentiveRendering Check Automatically before Rendering. (Modify Nothing, Just Check and Report in Status Bar)",
+        ("*", "Problems Detected") : "Problems Detected",
+        ("*", "No Problems Detected") : "No Problems Detected",
+        ("*", "(α Ver.)") : "(α Ver.)",
     },
     "ja_JP": {
         ("*", "Check") : "チェック",
@@ -42,5 +47,10 @@ translationDict = {
         ("*", "Check These Statues") : "チェックする項目",
         ("*", "Collections Visibiiity") : "コレクションの可視性",
         ("*", "Objects Visibiiity") : "オブジェクトの可視性",
+        ("*", "Auto Check before Render") : "レンダー前に自動でチェック",
+        ("*", "Run AttentiveRendering Check Automatically before Rendering. (Modify Nothing, Just Check and Report in Status Bar)") : "レンダー時に自動でAttentiveRenderingのチェックを実行します。(何も変更しません。チェックとステータスバーでのレポートのみです。)",
+        ("*", "Problems Detected") : "問題が検出されました",
+        ("*", "No Problems Detected") : "問題は検出されませんでした",
+        ("*", "(α Ver.)") : "(α版)",
     },
 }

@@ -22,7 +22,8 @@ else:
     from . import attenRenClass
     from . import translations
 
-import bpy
+import bpy, os, json
+from bpy.app.handlers import persistent
 from bpy.props import (
     IntProperty,
     FloatProperty,
@@ -33,105 +34,111 @@ from bpy.props import (
     PointerProperty,
 )
 
+def updateSettings(self, context):
+    context.scene.attenRen.saveSettings()
+
 def initProps():
     scene = bpy.types.Scene
-    scene.attenRen = attenRenClass.AttenRen()
-    # scene.attenRenActiveObj = PointerProperty(
-    #     # type=bpy.types.PropertyGroup,
-    #     type=bpy.types.Object,
-    #     name="obj",
-    #     options={"HIDDEN"},
-    # )
+
+    ### this should be in __init__ of attenRenClass but raise error, so done here 
+    settingFilePath = os.path.join(os.path.dirname(__file__), "attenrenSettings.txt")
+    if os.path.exists(settingFilePath):
+        with open(settingFilePath, encoding='utf-8') as f:
+            settings = json.load(f)
+    ###
+
     scene.attenRen_settings_collVisibility = BoolProperty(
         name=bpy.app.translations.pgettext("Collections Visibiiity"),
-        default=True,
-        # update=update.setIsCtrl
+        default=settings["attenRen_settings_collVisibility"]\
+                if "attenRen_settings_collVisibility" in settings else True,
+        update=updateSettings,
     )
     scene.attenRen_settings_objVisibility = BoolProperty(
         name=bpy.app.translations.pgettext("Objects Visibiiity"),
-        default=True,
-        # update=update.setIsCtrl
+        default=settings["attenRen_settings_objVisibility"]\
+                if "attenRen_settings_objVisibility" in settings else True,
+        update=updateSettings,
     )
     scene.attenRen_settings_missingFiles = BoolProperty(
         name=bpy.app.translations.pgettext("Missing Files"),
-        default=True,
-        # update=update.setIsCtrl
+        default=settings["attenRen_settings_missingFiles"]\
+                if "attenRen_settings_missingFiles" in settings else True,
+        update=updateSettings,
     )
     scene.attenRen_settings_renderRegion = BoolProperty(
         name=bpy.app.translations.pgettext("Render Region"),
-        default=True,
-        # update=update.setIsCtrl
+        default=settings["attenRen_settings_renderRegion"]\
+                if "attenRen_settings_renderRegion" in settings else True,
+        update=updateSettings,
     )
     scene.attenRen_settings_resolutionPercentage = BoolProperty(
         name=bpy.app.translations.pgettext("Resolution %"),
-        default=True,
-        # update=update.setIsCtrl
+        default=settings["attenRen_settings_resolutionPercentage"]\
+                if "attenRen_settings_resolutionPercentage" in settings else True,
+        update=updateSettings,
     )
     scene.attenRen_settings_samples = BoolProperty(
         name=bpy.app.translations.pgettext("Samples"),
-        default=True,
-        # update=update.setIsCtrl
+        default=settings["attenRen_settings_samples"]\
+                if "attenRen_settings_samples" in settings else True,
+        update=updateSettings,
     )
     scene.attenRen_settings_instance = BoolProperty(
         name=bpy.app.translations.pgettext("Instancing"),
-        default=True,
-        # update=update.setIsCtrl
+        default=settings["attenRen_settings_instance"]\
+                if "attenRen_settings_instance" in settings else True,
+        update=updateSettings,
     )
     scene.attenRen_settings_modifiers = BoolProperty(
         name=bpy.app.translations.pgettext("Modifiers"),
-        default=True,
-        # update=update.setIsCtrl
+        default=settings["attenRen_settings_modifiers"]\
+                if "attenRen_settings_modifiers" in settings else True,
+        update=updateSettings,
     )
     scene.attenRen_settings_composite = BoolProperty(
         name=bpy.app.translations.pgettext("Composite"),
-        default=True,
-        # update=update.setIsCtrl
+        default=settings["attenRen_settings_composite"]\
+                if "attenRen_settings_composite" in settings else True,
+        update=updateSettings,
     )
     scene.attenRen_settings_particleShowEmitter = BoolProperty(
         name=bpy.app.translations.pgettext("Show Emitter"),
-        default=True,
-        # update=update.setIsCtrl
+        default=settings["attenRen_settings_particleShowEmitter"]\
+                if "attenRen_settings_particleShowEmitter" in settings else True,
+        update=updateSettings,
     )
     scene.attenRen_settings_particleChildAmount = BoolProperty(
         name=bpy.app.translations.pgettext("Child Amount"),
-        default=True,
-        # update=update.setIsCtrl
+        default=settings["attenRen_settings_particleChildAmount"]\
+                if "attenRen_settings_particleChildAmount" in settings else True,
+        update=updateSettings,
     )
     scene.attenRen_settings_particleDisplayPercentage = BoolProperty(
         name=bpy.app.translations.pgettext("Viewport Display Amount"),
-        default=True,
-        # update=update.setIsCtrl
+        default=settings["attenRen_settings_particleDisplayPercentage"]\
+                if "attenRen_settings_particleDisplayPercentage" in settings else True,
+        update=updateSettings,
     )
     scene.attenRen_settings_gpencilModifiers = BoolProperty(
         name=bpy.app.translations.pgettext("Modifiers"),
-        default=True,
-        # update=update.setIsCtrl
+        default=settings["attenRen_settings_gpencilModifiers"]\
+                if "attenRen_settings_gpencilModifiers" in settings else True,
+        update=updateSettings,
     )
     scene.attenRen_settings_gpencilShaderEffects = BoolProperty(
         name=bpy.app.translations.pgettext("Effects"),
-        default=True,
-        # update=update.setIsCtrl
+        default=settings["attenRen_settings_gpencilShaderEffects"]\
+                if "attenRen_settings_gpencilShaderEffects" in settings else True,
+        update=updateSettings,
     )
-    # scene.autoHairRoundness = FloatProperty(
-    #     name="Roundness",
-    #     description="Children's roundness",
-    #     default=0.0,
-    #     min=0.0,
-    #     max=1.0,
-    #     # update=io.load("C:/opencv/VSproject/OpenCV/x64/Debug/out/00100/00100Ori_gt.mat")
-    # )
-    # scene.defaultHairNum = IntProperty(
-    #     name="defaultHairNum",
-    #     description="",
-    #     default=const.DEFAULTHAIRNUM
-    # )
-    # scene.autoHairBraidInfoTxtPath = StringProperty(
-    #     name="Braid Info .Txt Path",
-    # )
-    # scene.autoHairBangMatPath = StringProperty(
-    #     name="Bang .Mat Path",
-    #     description="Mat Path for Bang Synthesis",
-    # )
+    scene.attenRen_settings_autoCheck = BoolProperty(
+        name=bpy.app.translations.pgettext("Auto Check before Render"),
+        description=bpy.app.translations.pgettext("Run AttentiveRendering Check Automatically before Rendering. (Modify Nothing, Just Check and Report in Status Bar)"),
+        default=settings["attenRen_settings_autoCheck"]\
+                if "attenRen_settings_autoCheck" in settings else False,
+        update=updateSettings,
+    )
+    scene.attenRen = attenRenClass.AttenRen()
 
 def delProps():
     scene = bpy.types.Scene
@@ -150,6 +157,31 @@ def delProps():
     del scene.attenRen_settings_particleDisplayPercentage
     del scene.attenRen_settings_gpencilModifiers
     del scene.attenRen_settings_gpencilShaderEffects
+    del scene.attenRen_settings_autoCheck
+
+def topbarAppend(self, context):
+    layout = self.layout
+    layout.separator()
+    layout.prop(context.scene, "attenRen_settings_autoCheck")
+
+def autoCheckPopUp(self, context):
+    # if context.scene.attenRen:
+    self.layout.label(text=bpy.app.translations.pgettext("Problems Detected"))
+    # else:
+        # self.layout.label(text=bpy.app.translations.pgettext("No Problems Detected"))
+
+@persistent
+def autoCheckHandler(scene):
+    if scene.attenRen_settings_autoCheck:
+        bpy.ops.attenren.check()
+        # if scene.attenRen:
+        #     # self.report({'ERROR'}, bpy.app.translations.pgettext("Problems Detected"))
+        #     # bpy.context.window_manager.popup_menu(autoCheckPopUp, title="AttentiveRendering", icon='INFO')
+        #     bpy.context.window_manager.invoke_popup(autoCheckPopUp)
+        # else:
+        #     pass
+        #     # bpy.context.window_manager.popup_menu(autoCheckPopUp, title="AttentiveRendering", icon='INFO')
+        #     # self.report({'INFO'}, bpy.app.translations.pgettext("No Problems Detected"))
 
 classes = [
     main.ATTENREN_OT_Check,
@@ -165,15 +197,17 @@ def register():
     for c in classes:
         bpy.utils.register_class(c)
     initProps()
+    bpy.types.TOPBAR_MT_render.append(topbarAppend)
     bpy.app.translations.register(__name__, translations.translationDict)
-
+    bpy.app.handlers.render_pre.append(autoCheckHandler)
+    # bpy.app.handlers.render_init.append(autoCheckHandler)
 
 def unregister():
     bpy.app.translations.unregister(__name__)
+    bpy.types.TOPBAR_MT_render.remove(topbarAppend)
     delProps()
     for c in classes:
         bpy.utils.unregister_class(c)
-
 
 if __name__ == "__main__":
     register()
