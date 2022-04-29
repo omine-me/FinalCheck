@@ -9,6 +9,8 @@ from bpy.props import (
     IntProperty,
 )
 
+
+
 class ATTENREN_OT_Check(bpy.types.Operator):
     bl_idname = "attenren.check"
     bl_label = "Check"
@@ -16,14 +18,10 @@ class ATTENREN_OT_Check(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        context.scene.attenRen.visibiDiff.clear()
-        context.scene.attenRen.missingFiles.clear()
-        context.scene.attenRen.check()
-        bpy.context.window_manager.invoke_popup(self)
+        context.window_manager.attenRen.visibiDiff.clear()
+        context.window_manager.attenRen.missingFiles.clear()
+        context.window_manager.attenRen.check()
         return {'FINISHED'}
-    def draw(self, context):
-        layout = self.layout
-        layout.label(text="メッセージ")
 
 class ATTENREN_OT_SetObjHide(bpy.types.Operator):
     bl_idname = "attenren.set_obj_hide"
@@ -31,23 +29,30 @@ class ATTENREN_OT_SetObjHide(bpy.types.Operator):
     bl_description = bpy.app.translations.pgettext("Toggle Visibility")
     bl_options = {'REGISTER', 'UNDO'}
 
-    # obj: PointerProperty(
-    #     # type=bpy.types.PropertyGroup,
-    #     type=bpy.types.Object,
-    #     name="obj",
-    #     options={"HIDDEN"},
-    # )
-    # obj: BoolProperty(
-    #     name="obj",
-    #     options={"HIDDEN"},
-    # )
-    objName: StringProperty(
-        name="objName",
+    obj: StringProperty(
+        name="obj",
         options={"HIDDEN"},
     )
+    scene: StringProperty(
+        name="scene",
+        options={"HIDDEN"},
+    )
+    vl: StringProperty(
+        name="vl",
+        options={"HIDDEN"},
+    )
+    ### This def should be in top level for reuse, but causes crash...
+    def ShowMessageBox(self):
+        def draw(self, context):
+            self.layout.label(text=bpy.app.translations.pgettext("This Item cannot be Changed from Other Scenes"))
+        bpy.context.window_manager.popup_menu(draw, title = bpy.app.translations.pgettext("Toggle Scene to {}").format(self.scene), icon = "HIDE_OFF")
     def execute(self, context):
-        obj = context.scene.objects[self.objName]
-        obj.hide_set(not obj.hide_get())
+        if context.scene.name != self.scene:
+            self.ShowMessageBox()
+            return {'FINISHED'}
+        vl = bpy.data.scenes[self.scene].view_layers[self.vl]
+        obj = bpy.data.scenes[self.scene].objects[self.obj]
+        obj.hide_set(not obj.hide_get(view_layer=vl), view_layer=vl)
         return {'FINISHED'}
 
 class ATTENREN_OT_MatchVisibility(bpy.types.Operator):
@@ -61,7 +66,7 @@ class ATTENREN_OT_MatchVisibility(bpy.types.Operator):
         options={"HIDDEN"},
     )
     def execute(self, context):
-        context.scene.attenRen.matchVisibility(self.matchTo)
+        context.window_manager.attenRen.matchVisibility(self.matchTo)
         return {'FINISHED'}
 
 class ATTENREN_OT_ToggleVisibilityInPanel(bpy.types.Operator):
@@ -91,7 +96,7 @@ class ATTENREN_OT_ClearRenderRegion(bpy.types.Operator):
     )
     def execute(self, context):
         renderSettings = PyObj_FromPtr(int(self.objId))
-        context.scene.attenRen.clearRenderRegion(renderSettings)
+        context.window_manager.attenRen.clearRenderRegion(renderSettings)
         return {'FINISHED'}
 
 class AttenRenPanel:
@@ -155,7 +160,7 @@ class ATTENREN_PT_Menu(AttenRenPanel, bpy.types.Panel):
         row.operator(ATTENREN_OT_MatchVisibility.bl_idname, text=bpy.app.translations.pgettext("Match To Viewport")).matchTo = "VIEWPORT"
         row.operator(ATTENREN_OT_MatchVisibility.bl_idname, text=bpy.app.translations.pgettext("Match To Render")).matchTo = "RENDER"
         layout.separator()
-        attenRen = context.scene.attenRen
+        attenRen = context.window_manager.attenRen
         missingFiles = attenRen.missingFiles
         if missingFiles and missingFiles["files"]:
             row = layout.row(align=True)
@@ -240,7 +245,10 @@ class ATTENREN_PT_Menu(AttenRenPanel, bpy.types.Panel):
                         # row.separator_spacer()
                         row.operator(ATTENREN_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if mods["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(mods))
                         row.label(text=obj.name, icon=self.getObjType(obj))
-                        row.operator(ATTENREN_OT_SetObjHide.bl_idname, text="", icon="HIDE_ON" if obj.hide_get(view_layer=vl) else "HIDE_OFF",emboss=False).objName = obj.name
+                        objHide = row.operator(ATTENREN_OT_SetObjHide.bl_idname, text="", icon="HIDE_ON" if obj.hide_get(view_layer=vl) else "HIDE_OFF",emboss=False)
+                        objHide.obj = obj.name
+                        objHide.scene = scene.name
+                        objHide.vl = vl.name
                         row.prop(obj, "hide_viewport", icon_only=True,emboss=False)
                         row.prop(obj, "hide_render", icon_only=True,emboss=False)
                         if mods["hide"]:
@@ -328,34 +336,34 @@ class ATTENREN_PT_Menu_Settings(AttenRenPanel, bpy.types.Panel):
         layout = self.layout
         layout.label(text=bpy.app.translations.pgettext("Check These Statues"))
         box = layout.box()
-        box.prop(context.scene, "attenRen_settings_collVisibility")
-        box.prop(context.scene, "attenRen_settings_objVisibility")
-        box.prop(context.scene, "attenRen_settings_missingFiles")
-        box.prop(context.scene, "attenRen_settings_renderRegion")
-        box.prop(context.scene, "attenRen_settings_resolutionPercentage")
-        box.prop(context.scene, "attenRen_settings_samples")
-        box.prop(context.scene, "attenRen_settings_instance")
-        box.prop(context.scene, "attenRen_settings_modifiers")
+        box.prop(context.window_manager, "attenRen_settings_collVisibility")
+        box.prop(context.window_manager, "attenRen_settings_objVisibility")
+        box.prop(context.window_manager, "attenRen_settings_missingFiles")
+        box.prop(context.window_manager, "attenRen_settings_renderRegion")
+        box.prop(context.window_manager, "attenRen_settings_resolutionPercentage")
+        box.prop(context.window_manager, "attenRen_settings_samples")
+        box.prop(context.window_manager, "attenRen_settings_instance")
+        box.prop(context.window_manager, "attenRen_settings_modifiers")
         row = box.row()
         row.alignment = "LEFT"
-        row.prop(context.scene, "attenRen_settings_composite")
+        row.prop(context.window_manager, "attenRen_settings_composite")
         row.label(text=bpy.app.translations.pgettext("(α Ver.)"))
 
         box.label(text=bpy.app.translations.pgettext("Particles"))
         row = box.row()
         row.separator(factor=1)
-        row.prop(context.scene, "attenRen_settings_particleShowEmitter")
+        row.prop(context.window_manager, "attenRen_settings_particleShowEmitter")
         row = box.row()
         row.separator(factor=1)
-        row.prop(context.scene, "attenRen_settings_particleChildAmount")
+        row.prop(context.window_manager, "attenRen_settings_particleChildAmount")
         row = box.row()
         row.separator(factor=1)
-        row.prop(context.scene, "attenRen_settings_particleDisplayPercentage")
+        row.prop(context.window_manager, "attenRen_settings_particleDisplayPercentage")
         box.label(text=bpy.app.translations.pgettext("Grease Pencil"))
         row = box.row()
         row.separator(factor=1)
-        row.prop(context.scene, "attenRen_settings_gpencilModifiers")
+        row.prop(context.window_manager, "attenRen_settings_gpencilModifiers")
         row = box.row()
         row.separator(factor=1)
-        row.prop(context.scene, "attenRen_settings_gpencilShaderEffects")
-        layout.prop(context.scene, "attenRen_settings_autoCheck")
+        row.prop(context.window_manager, "attenRen_settings_gpencilShaderEffects")
+        layout.prop(context.window_manager, "attenRen_settings_autoCheck")

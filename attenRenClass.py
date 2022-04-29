@@ -56,6 +56,7 @@ class AttenRen:
         renderSettings.use_border = False
 
     def visibilityCheck(self, vl, objsDict, obj):
+        wm = bpy.context.window_manager
         objDict = {"hide": False}
         # if self.VISIB_MODE == "EYE":
         #     if not obj.hide_get(view_layer=vl) == obj.hide_render:
@@ -70,34 +71,33 @@ class AttenRen:
         #         objDict = {"hide": False}
         modifiersDict = {}
         for mod in obj.modifiers:
+            if mod.show_render != mod.show_viewport:
+                modifiersDict[mod] = {"hide": False}
             if mod.type == "PARTICLE_SYSTEM":
-                if mod.show_render != mod.show_viewport:
-                    modifiersDict[mod] = {"hide": False}
-                if obj.show_instancer_for_viewport != obj.show_instancer_for_render:
+                if wm.attenRen_settings_particleShowEmitter and (obj.show_instancer_for_viewport != obj.show_instancer_for_render):
                     if not modifiersDict[mod]: modifiersDict[mod] = {"hide": False}
                     modifiersDict[mod]["show_emitter"] = obj
                 settings = mod.particle_system.settings
-                if settings.child_type != "NONE" and (settings.child_nbr != settings.rendered_child_count):
+                if wm.attenRen_settings_particleChildAmount and settings.child_type != "NONE" and (settings.child_nbr != settings.rendered_child_count):
                     if not modifiersDict[mod]: modifiersDict[mod] = {"hide": False}
                     modifiersDict[mod]["child_amount"] = settings
-                if settings.display_percentage != 100:
+                if wm.attenRen_settings_particleDisplayPercentage and settings.display_percentage != 100:
                     if not modifiersDict[mod]: modifiersDict[mod] = {"hide": False}
                     modifiersDict[mod]["display_percentage"] = settings
-            else:
-                if mod.show_render != mod.show_viewport:
-                    modifiersDict[mod] = {"hide": False}
         objDict["mods"] = modifiersDict
 
         fxsDict = {}
-        for fx in obj.shader_effects:
-            if fx.show_render != fx.show_viewport:
-                fxsDict[fx] = {}
+        if wm.attenRen_settings_gpencilShaderEffects:
+            for fx in obj.shader_effects:
+                if fx.show_render != fx.show_viewport:
+                    fxsDict[fx] = {}
         objDict["fxs"] = fxsDict
 
         gpfxsDict = {}
-        for gpfx in obj.grease_pencil_modifiers:
-            if gpfx.show_render != gpfx.show_viewport:
-                gpfxsDict[gpfx] = {}
+        if wm.attenRen_settings_gpencilModifiers:
+            for gpfx in obj.grease_pencil_modifiers:
+                if gpfx.show_render != gpfx.show_viewport:
+                    gpfxsDict[gpfx] = {}
         objDict["gpfxs"] = gpfxsDict
 
         if obj.instance_type != "NONE" and (obj.show_instancer_for_viewport != obj.show_instancer_for_render):
@@ -117,36 +117,41 @@ class AttenRen:
                 self.getObjRecursively(collsDict, child.children, vl)
 
     def check(self):
+        scene = bpy.context.scene
+        wm = bpy.context.window_manager
         self.missingFiles["hide"] = False
-        self.missingFiles["files"] = [os.path.normpath(bpy.path.abspath(image.filepath)) for image in bpy.data.images if (image.filepath) and (not os.path.exists(bpy.path.abspath(image.filepath)))]
+        self.missingFiles["files"] = [os.path.normpath(bpy.path.abspath(image.filepath)) for image in bpy.data.images if (image.filepath) and (not os.path.exists(bpy.path.abspath(image.filepath)))]\
+                                        if wm.attenRen_settings_missingFiles else []
         for scene in bpy.data.scenes:
             sceneDict = {"hide":False}
             # Composite Node Check (alpha version)
-            if scene.use_nodes:
+            if wm.attenRen_settings_composite and scene.use_nodes:
                 comp =  [node for node in scene.node_tree.nodes if node.bl_static_type == "COMPOSITE"]
                 viewer =  [node for node in scene.node_tree.nodes if node.bl_static_type == "VIEWER"]
                 if len(comp) == len(viewer) == 1 and len(comp[0].inputs[0].links) and len(viewer[0].inputs[0].links):
                     if comp[0].inputs[0].links[0].from_node.name != viewer[0].inputs[0].links[0].from_node.name:
                         sceneDict["composite"] = {}
-
-            if (scene.render.border_max_x != 1. or
+            print(wm.attenRen_settings_renderRegion, scene)
+            if (wm.attenRen_settings_renderRegion and
+                (scene.render.border_max_x != 1. or
                 scene.render.border_max_y != 1. or
                 scene.render.border_min_x != 0. or
-                scene.render.border_min_y != 0.):
+                scene.render.border_min_y != 0.)):
                 sceneDict["border"] = scene.render
-            if scene.render.resolution_percentage < 100:
+            if wm.attenRen_settings_resolutionPercentage and wm.render.resolution_percentage < 100:
                 sceneDict["resolution_percentage"] = scene.render
             # Check if render samples are fewer than preview samples
-            if scene.render.engine == "CYCLES":
-                if scene.cycles.progressive == "PATH":
-                    if scene.cycles.samples < scene.cycles.preview_samples:
-                        sceneDict["cycles_sample"] = scene.render
-                elif scene.cycles.progressive == "BRANCHED_PATH":
-                    if scene.cycles.aa_samples < scene.cycles.preview_aa_samples:
-                        sceneDict["cycles_aa_sample"] = scene.render
-            elif scene.render.engine == "BLENDER_EEVEE":
-                if scene.eevee.taa_render_samples < scene.eevee.taa_samples:
-                    sceneDict["eevee_sample"] = scene.render
+            if wm.attenRen_settings_samples:
+                if scene.render.engine == "CYCLES":
+                    if scene.cycles.progressive == "PATH":
+                        if scene.cycles.samples < scene.cycles.preview_samples:
+                            sceneDict["cycles_sample"] = scene.render
+                    elif scene.cycles.progressive == "BRANCHED_PATH":
+                        if scene.cycles.aa_samples < scene.cycles.preview_aa_samples:
+                            sceneDict["cycles_aa_sample"] = scene.render
+                elif scene.render.engine == "BLENDER_EEVEE":
+                    if scene.eevee.taa_render_samples < scene.eevee.taa_samples:
+                        sceneDict["eevee_sample"] = scene.render
 
             vlsDict = {}
             for vl in scene.view_layers:
@@ -232,24 +237,24 @@ class AttenRen:
     def saveSettings(self):
         settingFilePath = os.path.join(os.path.dirname(__file__), "attenrenSettings.txt")
         # if not os.path.exists(settingFilePath):
-        types = bpy.types.Scene
-        scene = bpy.context.scene
+        types = bpy.types.WindowManager
+        wm = bpy.context.window_manager
         settings = {
-            types.attenRen_settings_collVisibility.keywords["attr"]: scene.attenRen_settings_collVisibility,
-            types.attenRen_settings_objVisibility.keywords["attr"]: scene.attenRen_settings_objVisibility,
-            types.attenRen_settings_missingFiles.keywords["attr"]: scene.attenRen_settings_missingFiles,
-            types.attenRen_settings_renderRegion.keywords["attr"]: scene.attenRen_settings_renderRegion,
-            types.attenRen_settings_resolutionPercentage.keywords["attr"]: scene.attenRen_settings_resolutionPercentage,
-            types.attenRen_settings_samples.keywords["attr"]: scene.attenRen_settings_samples,
-            types.attenRen_settings_instance.keywords["attr"]: scene.attenRen_settings_instance,
-            types.attenRen_settings_modifiers.keywords["attr"]: scene.attenRen_settings_modifiers,
-            types.attenRen_settings_composite.keywords["attr"]: scene.attenRen_settings_composite,
-            types.attenRen_settings_particleShowEmitter.keywords["attr"]: scene.attenRen_settings_particleShowEmitter,
-            types.attenRen_settings_particleChildAmount.keywords["attr"]: scene.attenRen_settings_particleChildAmount,
-            types.attenRen_settings_particleDisplayPercentage.keywords["attr"]: scene.attenRen_settings_particleDisplayPercentage,
-            types.attenRen_settings_gpencilModifiers.keywords["attr"]: scene.attenRen_settings_gpencilModifiers,
-            types.attenRen_settings_gpencilShaderEffects.keywords["attr"]: scene.attenRen_settings_gpencilShaderEffects,
-            types.attenRen_settings_autoCheck.keywords["attr"]: scene.attenRen_settings_autoCheck
+            types.attenRen_settings_collVisibility.keywords["attr"]: wm.attenRen_settings_collVisibility,
+            types.attenRen_settings_objVisibility.keywords["attr"]: wm.attenRen_settings_objVisibility,
+            types.attenRen_settings_missingFiles.keywords["attr"]: wm.attenRen_settings_missingFiles,
+            types.attenRen_settings_renderRegion.keywords["attr"]: wm.attenRen_settings_renderRegion,
+            types.attenRen_settings_resolutionPercentage.keywords["attr"]: wm.attenRen_settings_resolutionPercentage,
+            types.attenRen_settings_samples.keywords["attr"]: wm.attenRen_settings_samples,
+            types.attenRen_settings_instance.keywords["attr"]: wm.attenRen_settings_instance,
+            types.attenRen_settings_modifiers.keywords["attr"]: wm.attenRen_settings_modifiers,
+            types.attenRen_settings_composite.keywords["attr"]: wm.attenRen_settings_composite,
+            types.attenRen_settings_particleShowEmitter.keywords["attr"]: wm.attenRen_settings_particleShowEmitter,
+            types.attenRen_settings_particleChildAmount.keywords["attr"]: wm.attenRen_settings_particleChildAmount,
+            types.attenRen_settings_particleDisplayPercentage.keywords["attr"]: wm.attenRen_settings_particleDisplayPercentage,
+            types.attenRen_settings_gpencilModifiers.keywords["attr"]: wm.attenRen_settings_gpencilModifiers,
+            types.attenRen_settings_gpencilShaderEffects.keywords["attr"]: wm.attenRen_settings_gpencilShaderEffects,
+            types.attenRen_settings_autoCheck.keywords["attr"]: wm.attenRen_settings_autoCheck
         }
         with open(settingFilePath, 'w', encoding='utf-8', newline='\n') as fp:
             json.dump(settings, fp, indent=2)
