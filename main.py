@@ -18,7 +18,7 @@ class ATTENREN_OT_Check(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        context.window_manager.attenRen.visibiDiff.clear()
+        context.window_manager.attenRen.checkedItems.clear()
         context.window_manager.attenRen.missingFiles.clear()
         context.window_manager.attenRen.check()
         return {'FINISHED'}
@@ -171,7 +171,7 @@ class ATTENREN_PT_Menu(AttenRenPanel, bpy.types.Panel):
                     row = layout.row(align=True)
                     row.separator(factor=2)
                     row.label(text=image, icon="FILE_IMAGE")
-        for scene, vls in attenRen.visibiDiff.items():
+        for scene, vls in attenRen.checkedItems.items():
             row = layout.row(align=True)
             row.alignment="LEFT"
             # row.label(text="｜")
@@ -231,7 +231,7 @@ class ATTENREN_PT_Menu(AttenRenPanel, bpy.types.Panel):
                     # row.separator_spacer()
                     row.operator(ATTENREN_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if objs["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(objs))
                     row.label(text=coll.name, icon="OUTLINER_COLLECTION")
-                    if not i == 0: #Master Collection doesn't need this process
+                    if hasattr(coll, "collection"): #Omit Master Collection because it doesn't have show/hide status.
                         row.prop(coll, "hide_viewport", icon_only=True,emboss=False)
                         row.prop(coll.collection, "hide_viewport", icon_only=True,emboss=False)
                         row.prop(coll.collection, "hide_render", icon_only=True,emboss=False)

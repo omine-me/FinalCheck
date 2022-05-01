@@ -6,7 +6,7 @@ class AttenRen:
         #VISIB_MODE = "DISPLAY"
         self.VISIB_MODE = "BOTH"
         self.missingFiles = {}
-        self.visibiDiff = {}
+        self.checkedItems = {}
         """ 
         {   
             scene1: {
@@ -55,33 +55,42 @@ class AttenRen:
         renderSettings.border_min_y = 0.
         renderSettings.use_border = False
 
-    def visibilityCheck(self, vl, objsDict, obj):
+    def objectCheck(self, vl, objsDict, obj):
         wm = bpy.context.window_manager
+        addToObjsDict = False
         objDict = {"hide": False}
-        # if self.VISIB_MODE == "EYE":
-        #     if not obj.hide_get(view_layer=vl) == obj.hide_render:
-        #         objDict = {"hide": False}
-        # elif self.VISIB_MODE == "DISPLAY":
-        #     if not obj.hide_viewport == obj.hide_render:
-        #         objDict = {"hide": False}
-        # else:
-        #     if (((obj.hide_get(view_layer=vl) != obj.hide_viewport) and obj.hide_render == False) or 
-        #         ((obj.hide_get(view_layer=vl) == obj.hide_viewport == False) and obj.hide_render == True) or
-        #         ((obj.hide_get(view_layer=vl) == obj.hide_viewport == True) and obj.hide_render == False)):
-        #         objDict = {"hide": False}
+        if wm.attenRen_settings_objVisibility:
+            if self.VISIB_MODE == "EYE":
+                if not obj.hide_get(view_layer=vl) == obj.hide_render:
+                    addToObjsDict = True
+                    objDict = {"hide": False}
+            elif self.VISIB_MODE == "DISPLAY":
+                if not obj.hide_viewport == obj.hide_render:
+                    addToObjsDict = True
+                    objDict = {"hide": False}
+            else:
+                if (((obj.hide_get(view_layer=vl) != obj.hide_viewport) and obj.hide_render == False) or 
+                    ((obj.hide_get(view_layer=vl) == obj.hide_viewport == False) and obj.hide_render == True) or
+                    ((obj.hide_get(view_layer=vl) == obj.hide_viewport == True) and obj.hide_render == False)):
+                    addToObjsDict = True
+                    objDict = {"hide": False}
         modifiersDict = {}
         for mod in obj.modifiers:
-            if mod.show_render != mod.show_viewport:
+            if wm.attenRen_settings_modifiers and mod.show_render != mod.show_viewport:
+                addToObjsDict = True
                 modifiersDict[mod] = {"hide": False}
             if mod.type == "PARTICLE_SYSTEM":
                 if wm.attenRen_settings_particleShowEmitter and (obj.show_instancer_for_viewport != obj.show_instancer_for_render):
+                    addToObjsDict = True
                     if not modifiersDict[mod]: modifiersDict[mod] = {"hide": False}
                     modifiersDict[mod]["show_emitter"] = obj
                 settings = mod.particle_system.settings
                 if wm.attenRen_settings_particleChildAmount and settings.child_type != "NONE" and (settings.child_nbr != settings.rendered_child_count):
+                    addToObjsDict = True
                     if not modifiersDict[mod]: modifiersDict[mod] = {"hide": False}
                     modifiersDict[mod]["child_amount"] = settings
                 if wm.attenRen_settings_particleDisplayPercentage and settings.display_percentage != 100:
+                    addToObjsDict = True
                     if not modifiersDict[mod]: modifiersDict[mod] = {"hide": False}
                     modifiersDict[mod]["display_percentage"] = settings
         objDict["mods"] = modifiersDict
@@ -90,6 +99,7 @@ class AttenRen:
         if wm.attenRen_settings_gpencilShaderEffects:
             for fx in obj.shader_effects:
                 if fx.show_render != fx.show_viewport:
+                    addToObjsDict = True
                     fxsDict[fx] = {}
         objDict["fxs"] = fxsDict
 
@@ -97,22 +107,46 @@ class AttenRen:
         if wm.attenRen_settings_gpencilModifiers:
             for gpfx in obj.grease_pencil_modifiers:
                 if gpfx.show_render != gpfx.show_viewport:
+                    addToObjsDict = True
                     gpfxsDict[gpfx] = {}
         objDict["gpfxs"] = gpfxsDict
 
-        if obj.instance_type != "NONE" and (obj.show_instancer_for_viewport != obj.show_instancer_for_render):
+        if wm.attenRen_settings_instance and\
+           obj.instance_type != "NONE" and\
+           (obj.show_instancer_for_viewport != obj.show_instancer_for_render):
+            addToObjsDict = True
             objDict["instance"] = {}
-        objsDict[obj] = objDict
+        
+        if addToObjsDict:
+            objsDict[obj] = objDict
 
 
     def getObjRecursively(self, collsDict, children, vl):
         for child in children:
             collDict = {"hide":False}
             objsDict = {}
+            addToObjsDict = False
+
             for obj in child.collection.objects:
-                self.visibilityCheck(vl, objsDict, obj)
-            collDict["objs"] = objsDict
-            collsDict[child] = collDict
+                self.objectCheck(vl, objsDict, obj)
+            if bpy.context.window_manager.attenRen_settings_collVisibility:
+                if self.VISIB_MODE == "EYE":
+                    pass
+                    # if not obj.hide_get(view_layer=vl) == obj.hide_render:
+                    #     addToObjsDict = True
+                elif self.VISIB_MODE == "DISPLAY":
+                    pass
+                    # if not obj.hide_viewport == obj.hide_render:
+                    #     addToObjsDict = True
+                else:
+                    if (((child.hide_viewport != child.collection.hide_viewport) and child.collection.hide_render == False) or 
+                        ((child.hide_viewport == child.collection.hide_viewport == False) and child.collection.hide_render == True) or
+                        ((child.hide_viewport == child.collection.hide_viewport == True) and child.collection.hide_render == False)):
+                        addToObjsDict = True
+
+            if objsDict or addToObjsDict:
+                collDict["objs"] = objsDict
+                collsDict[child] = collDict
             if len(child.children) != 0:
                 self.getObjRecursively(collsDict, child.children, vl)
 
@@ -138,7 +172,7 @@ class AttenRen:
                 scene.render.border_min_x != 0. or
                 scene.render.border_min_y != 0.)):
                 sceneDict["border"] = scene.render
-            if wm.attenRen_settings_resolutionPercentage and wm.render.resolution_percentage < 100:
+            if wm.attenRen_settings_resolutionPercentage and scene.render.resolution_percentage < 100:
                 sceneDict["resolution_percentage"] = scene.render
             # Check if render samples are fewer than preview samples
             if wm.attenRen_settings_samples:
@@ -161,9 +195,10 @@ class AttenRen:
                 collDict = {"hide":False}
                 objsDict = {}
                 for obj in vl.layer_collection.collection.objects:
-                    self.visibilityCheck(vl, objsDict, obj)
-                collDict["objs"] = objsDict
-                collsDict[vl.layer_collection.collection] = collDict
+                    self.objectCheck(vl, objsDict, obj)
+                if objsDict:
+                    collDict["objs"] = objsDict
+                    collsDict[vl.layer_collection.collection] = collDict
                 ### End of Master Coll Process
                 # Other collections, check recursively
                 self.getObjRecursively(collsDict, vl.layer_collection.children, vl)
@@ -171,33 +206,33 @@ class AttenRen:
                 vlDict["colls"] = collsDict   
                 vlsDict[vl] = vlDict
             sceneDict["view_layers"] = vlsDict
-            self.visibiDiff[scene] = sceneDict
-        # print(self.visibiDiff)
+            self.checkedItems[scene] = sceneDict
+        # print(self.checkedItems)
         # for coll in bpy.data.collections:
         #     if self.VISIB_MODE == "EYE":
         #         if not bpy.context.view_layer.layer_collection.children.get(coll.name).hide_viewport == coll.hide_render:
-        #             self.visibiDiff.add(coll)
+        #             self.checkedItems.add(coll)
         #     elif self.VISIB_MODE == "DISPLAY":
         #         if not coll.hide_viewport == coll.hide_render:
-        #             self.visibiDiff.add(coll)
+        #             self.checkedItems.add(coll)
         #     else:
         #         if (((bpy.context.view_layer.layer_collection.children.get(coll.name).hide_viewport != coll.hide_viewport) and coll.hide_render == False) or 
         #             ((bpy.context.view_layer.layer_collection.children.get(coll.name).hide_viewport == coll.hide_viewport == False) and coll.hide_render == True) or
         #             ((bpy.context.view_layer.layer_collection.children.get(coll.name).hide_viewport == coll.hide_viewport == True) and coll.hide_render == False)):
-        #             self.visibiDiff.add(coll)
+        #             self.checkedItems.add(coll)
 
         # for obj in bpy.context.scene.objects:
         #     if self.VISIB_MODE == "EYE":
         #         if not obj.hide_get() == obj.hide_render:
-        #             self.visibiDiff.add(obj)
+        #             self.checkedItems.add(obj)
         #     elif self.VISIB_MODE == "DISPLAY":
         #         if not obj.hide_viewport == obj.hide_render:
-        #             self.visibiDiff.add(obj)
+        #             self.checkedItems.add(obj)
         #     else:
         #         if (((obj.hide_get() != obj.hide_viewport) and obj.hide_render == False) or 
         #             ((obj.hide_get() == obj.hide_viewport == False) and obj.hide_render == True) or
         #             ((obj.hide_get() == obj.hide_viewport == True) and obj.hide_render == False)):
-        #             self.visibiDiff.add(obj)
+        #             self.checkedItems.add(obj)
 
     def matchVisibility(self, matchTo):
         """
@@ -216,9 +251,9 @@ class AttenRen:
             else: display icons will be disabled (or user can select in preference)
                   (eye's icon has its view layer wise info, so we wouldn't like to change)
         """
-        # if not self.visibiDiff:
+        # if not self.checkedItems:
         self.check()
-        for scene in self.visibiDiff.values():
+        for scene in self.checkedItems.values():
             for vl in scene["view_layers"].values():
                 for idx, coll in enumerate(vl["colls"]):
                     if idx:
