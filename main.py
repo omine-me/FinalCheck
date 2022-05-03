@@ -9,8 +9,6 @@ from bpy.props import (
     IntProperty,
 )
 
-
-
 class ATTENREN_OT_Check(bpy.types.Operator):
     bl_idname = "attenren.check"
     bl_label = "Check"
@@ -162,6 +160,10 @@ class ATTENREN_PT_Menu(AttenRenPanel, bpy.types.Panel):
         layout.separator()
         attenRen = context.window_manager.attenRen
         missingFiles = attenRen.missingFiles
+        if not missingFiles and not attenRen.checkedItems and not attenRen.notCheckedYet:
+            row = layout.row(align=True)
+            row.alignment = "CENTER"
+            row.label(text=bpy.app.translations.pgettext("No Problems Detected"))
         if missingFiles and missingFiles["files"]:
             row = layout.row(align=True)
             row.operator(ATTENREN_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if missingFiles["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(missingFiles))

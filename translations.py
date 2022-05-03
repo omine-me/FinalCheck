@@ -1,6 +1,7 @@
 translationDict = {
     "en_US": {
         ("*", "Check") : "Check",
+        ("*", "No Problems Detected") : "No Problems Detected",
         ("*", "Match To Viewport") : "Match To Viewport",
         ("*", "Match To Render") : "Match To Render",
         ("*", "Detect Problems") : "Detect Problems",
@@ -30,6 +31,7 @@ translationDict = {
     },
     "ja_JP": {
         ("*", "Check") : "チェック",
+        ("*", "No Problems Detected") : "問題は検出されませんでした",
         ("*", "Match To Viewport") : "ビューポートに合わせる",
         ("*", "Match To Render") : "レンダーに合わせる",
         ("*", "Detect Problems") : "問題を検出する",

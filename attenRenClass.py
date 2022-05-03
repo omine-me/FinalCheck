@@ -7,6 +7,7 @@ class AttenRen:
         self.VISIB_MODE = "BOTH"
         self.missingFiles = {}
         self.checkedItems = {}
+        self.notCheckedYet = True
         """ 
         {   
             scene1: {
@@ -151,11 +152,15 @@ class AttenRen:
                 self.getObjRecursively(collsDict, child.children, vl)
 
     def check(self):
+        self.notCheckedYet = False
         scene = bpy.context.scene
         wm = bpy.context.window_manager
-        self.missingFiles["hide"] = False
-        self.missingFiles["files"] = [os.path.normpath(bpy.path.abspath(image.filepath)) for image in bpy.data.images if (image.filepath) and (not os.path.exists(bpy.path.abspath(image.filepath)))]\
-                                        if wm.attenRen_settings_missingFiles else []
+        if wm.attenRen_settings_missingFiles:
+            missingFiles = [os.path.normpath(bpy.path.abspath(image.filepath)) for image in bpy.data.images if (image.filepath) and (not os.path.exists(bpy.path.abspath(image.filepath)))]
+            if missingFiles:
+                self.missingFiles["hide"] = False
+                self.missingFiles["files"] = missingFiles
+
         for scene in bpy.data.scenes:
             sceneDict = {"hide":False}
             # Composite Node Check (alpha version)
@@ -165,7 +170,6 @@ class AttenRen:
                 if len(comp) == len(viewer) == 1 and len(comp[0].inputs[0].links) and len(viewer[0].inputs[0].links):
                     if comp[0].inputs[0].links[0].from_node.name != viewer[0].inputs[0].links[0].from_node.name:
                         sceneDict["composite"] = {}
-            print(wm.attenRen_settings_renderRegion, scene)
             if (wm.attenRen_settings_renderRegion and
                 (scene.render.border_max_x != 1. or
                 scene.render.border_max_y != 1. or
@@ -203,10 +207,12 @@ class AttenRen:
                 # Other collections, check recursively
                 self.getObjRecursively(collsDict, vl.layer_collection.children, vl)
                 
-                vlDict["colls"] = collsDict   
-                vlsDict[vl] = vlDict
-            sceneDict["view_layers"] = vlsDict
-            self.checkedItems[scene] = sceneDict
+                if collsDict:
+                    vlDict["colls"] = collsDict   
+                    vlsDict[vl] = vlDict
+            if vlsDict:
+                sceneDict["view_layers"] = vlsDict
+                self.checkedItems[scene] = sceneDict
         # print(self.checkedItems)
         # for coll in bpy.data.collections:
         #     if self.VISIB_MODE == "EYE":
