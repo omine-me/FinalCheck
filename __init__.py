@@ -34,149 +34,168 @@ from bpy.props import (
     PointerProperty,
 )
 
-def updateSettings(self, context):
-    context.window_manager.attenRen.saveSettings()
+def updatePrefs(self, context):
+    context.window_manager.attenRen.savePrefs()
 
 def initProps():
     wm = bpy.types.WindowManager
-    settings = []
+    prefs = []
 
     ### this should be in __init__ of attenRenClass but raise error, so done here 
-    settingFilePath = os.path.join(os.path.dirname(__file__), "attenrenSettings.txt")
-    if os.path.exists(settingFilePath):
-        with open(settingFilePath, encoding='utf-8') as f:
-            settings = json.load(f)
+    prefsFilePath = os.path.join(os.path.dirname(__file__), "attenrenPrefs.txt")
+    if os.path.exists(prefsFilePath):
+        with open(prefsFilePath, encoding='utf-8') as f:
+            prefs = json.load(f)
     ###
 
-    wm.attenRen_settings_collVisibility = BoolProperty(
-        name=bpy.app.translations.pgettext("Collections Visibiiity"),
-        default=settings["attenRen_settings_collVisibility"]\
-                if "attenRen_settings_collVisibility" in settings else True,
-        update=updateSettings,
+    wm.attenRen_prefs_currentScene = BoolProperty(
+        name="Current Scene Only",
+        default=prefs["attenRen_prefs_currentScene"]\
+                if "attenRen_prefs_currentScene" in prefs else False,
+        update=updatePrefs,
     )
-    wm.attenRen_settings_objVisibility = BoolProperty(
-        name=bpy.app.translations.pgettext("Objects Visibiiity"),
-        default=settings["attenRen_settings_objVisibility"]\
-                if "attenRen_settings_objVisibility" in settings else True,
-        update=updateSettings,
+    wm.attenRen_prefs_currentViewLayer = BoolProperty(
+        name="Current View Layer Only",
+        default=prefs["attenRen_prefs_currentViewLayer"]\
+                if "attenRen_prefs_currentViewLayer" in prefs else False,
+        update=updatePrefs,
     )
-    wm.attenRen_settings_missingFiles = BoolProperty(
-        name=bpy.app.translations.pgettext("Missing Files"),
-        default=settings["attenRen_settings_missingFiles"]\
-                if "attenRen_settings_missingFiles" in settings else True,
-        update=updateSettings,
+    wm.attenRen_prefs_collVisibility = BoolProperty(
+        name="Collections Visibiiity",
+        default=prefs["attenRen_prefs_collVisibility"]\
+                if "attenRen_prefs_collVisibility" in prefs else True,
+        update=updatePrefs,
     )
-    wm.attenRen_settings_renderRegion = BoolProperty(
-        name=bpy.app.translations.pgettext("Render Region"),
-        default=settings["attenRen_settings_renderRegion"]\
-                if "attenRen_settings_renderRegion" in settings else True,
-        update=updateSettings,
+    wm.attenRen_prefs_objVisibility = BoolProperty(
+        name="Objects Visibiiity",
+        default=prefs["attenRen_prefs_objVisibility"]\
+                if "attenRen_prefs_objVisibility" in prefs else True,
+        update=updatePrefs,
     )
-    wm.attenRen_settings_resolutionPercentage = BoolProperty(
-        name=bpy.app.translations.pgettext("Resolution %"),
-        default=settings["attenRen_settings_resolutionPercentage"]\
-                if "attenRen_settings_resolutionPercentage" in settings else True,
-        update=updateSettings,
+    wm.attenRen_prefs_missingFiles = BoolProperty(
+        name="Missing Files",
+        default=prefs["attenRen_prefs_missingFiles"]\
+                if "attenRen_prefs_missingFiles" in prefs else True,
+        update=updatePrefs,
     )
-    wm.attenRen_settings_samples = BoolProperty(
-        name=bpy.app.translations.pgettext("Samples"),
-        default=settings["attenRen_settings_samples"]\
-                if "attenRen_settings_samples" in settings else True,
-        update=updateSettings,
+    wm.attenRen_prefs_renderRegion = BoolProperty(
+        name="Render Region",
+        default=prefs["attenRen_prefs_renderRegion"]\
+                if "attenRen_prefs_renderRegion" in prefs else True,
+        update=updatePrefs,
     )
-    wm.attenRen_settings_instance = BoolProperty(
-        name=bpy.app.translations.pgettext("Instancing"),
-        default=settings["attenRen_settings_instance"]\
-                if "attenRen_settings_instance" in settings else True,
-        update=updateSettings,
+    wm.attenRen_prefs_resolutionPercentage = BoolProperty(
+        name="Resolution %",
+        default=prefs["attenRen_prefs_resolutionPercentage"]\
+                if "attenRen_prefs_resolutionPercentage" in prefs else True,
+        update=updatePrefs,
     )
-    wm.attenRen_settings_modifiers = BoolProperty(
-        name=bpy.app.translations.pgettext("Modifiers"),
-        default=settings["attenRen_settings_modifiers"]\
-                if "attenRen_settings_modifiers" in settings else True,
-        update=updateSettings,
+    wm.attenRen_prefs_samples = BoolProperty(
+        name="Samples",
+        default=prefs["attenRen_prefs_samples"]\
+                if "attenRen_prefs_samples" in prefs else True,
+        update=updatePrefs,
     )
-    wm.attenRen_settings_composite = BoolProperty(
-        name=bpy.app.translations.pgettext("Composite"),
-        default=settings["attenRen_settings_composite"]\
-                if "attenRen_settings_composite" in settings else False,
-        update=updateSettings,
+    wm.attenRen_prefs_instance = BoolProperty(
+        name="Instancing",
+        default=prefs["attenRen_prefs_instance"]\
+                if "attenRen_prefs_instance" in prefs else True,
+        update=updatePrefs,
     )
-    wm.attenRen_settings_particleShowEmitter = BoolProperty(
-        name=bpy.app.translations.pgettext("Show Emitter"),
-        default=settings["attenRen_settings_particleShowEmitter"]\
-                if "attenRen_settings_particleShowEmitter" in settings else True,
-        update=updateSettings,
+    wm.attenRen_prefs_modifiers = BoolProperty(
+        name="Modifiers",
+        default=prefs["attenRen_prefs_modifiers"]\
+                if "attenRen_prefs_modifiers" in prefs else True,
+        update=updatePrefs,
     )
-    wm.attenRen_settings_particleChildAmount = BoolProperty(
-        name=bpy.app.translations.pgettext("Child Amount"),
-        default=settings["attenRen_settings_particleChildAmount"]\
-                if "attenRen_settings_particleChildAmount" in settings else True,
-        update=updateSettings,
+    wm.attenRen_prefs_composite = BoolProperty(
+        name="Composite",
+        default=prefs["attenRen_prefs_composite"]\
+                if "attenRen_prefs_composite" in prefs else False,
+        update=updatePrefs,
     )
-    wm.attenRen_settings_particleDisplayPercentage = BoolProperty(
-        name=bpy.app.translations.pgettext("Viewport Display Amount"),
-        default=settings["attenRen_settings_particleDisplayPercentage"]\
-                if "attenRen_settings_particleDisplayPercentage" in settings else True,
-        update=updateSettings,
+    wm.attenRen_prefs_particleShowEmitter = BoolProperty(
+        name="Show Emitter",
+        default=prefs["attenRen_prefs_particleShowEmitter"]\
+                if "attenRen_prefs_particleShowEmitter" in prefs else True,
+        update=updatePrefs,
     )
-    wm.attenRen_settings_gpencilModifiers = BoolProperty(
-        name=bpy.app.translations.pgettext("Modifiers"),
-        default=settings["attenRen_settings_gpencilModifiers"]\
-                if "attenRen_settings_gpencilModifiers" in settings else True,
-        update=updateSettings,
+    wm.attenRen_prefs_particleChildAmount = BoolProperty(
+        name="Child Amount",
+        default=prefs["attenRen_prefs_particleChildAmount"]\
+                if "attenRen_prefs_particleChildAmount" in prefs else True,
+        update=updatePrefs,
     )
-    wm.attenRen_settings_gpencilShaderEffects = BoolProperty(
-        name=bpy.app.translations.pgettext("Effects"),
-        default=settings["attenRen_settings_gpencilShaderEffects"]\
-                if "attenRen_settings_gpencilShaderEffects" in settings else True,
-        update=updateSettings,
+    wm.attenRen_prefs_particleDisplayPercentage = BoolProperty(
+        name="Viewport Display Amount",
+        default=prefs["attenRen_prefs_particleDisplayPercentage"]\
+                if "attenRen_prefs_particleDisplayPercentage" in prefs else True,
+        update=updatePrefs,
     )
-    wm.attenRen_settings_autoCheck = BoolProperty(
-        name=bpy.app.translations.pgettext("Auto Check before Render"),
-        description=bpy.app.translations.pgettext("Run AttentiveRendering Check Automatically before Rendering. (α Ver. Just Check and Refresh Addon Panel)"),
-        default=settings["attenRen_settings_autoCheck"]\
-                if "attenRen_settings_autoCheck" in settings else False,
-        update=updateSettings,
+    wm.attenRen_prefs_gpencilModifiers = BoolProperty(
+        name="Modifiers",
+        default=prefs["attenRen_prefs_gpencilModifiers"]\
+                if "attenRen_prefs_gpencilModifiers" in prefs else True,
+        update=updatePrefs,
+    )
+    wm.attenRen_prefs_gpencilShaderEffects = BoolProperty(
+        name="Effects",
+        default=prefs["attenRen_prefs_gpencilShaderEffects"]\
+                if "attenRen_prefs_gpencilShaderEffects" in prefs else True,
+        update=updatePrefs,
+    )
+    wm.attenRen_prefs_autoCheck = BoolProperty(
+        name="Auto Check before Render",
+        description=bpy.app.translations.pgettext_iface("Run AttentiveRendering Check Automatically before Rendering. (α Ver. Just Check and Refresh Addon Panel)"),
+        default=prefs["attenRen_prefs_autoCheck"]\
+                if "attenRen_prefs_autoCheck" in prefs else False,
+        update=updatePrefs,
     )
     wm.attenRen = attenRenClass.AttenRen()
 
 def delProps():
     wm = bpy.types.WindowManager
     del wm.attenRen
-    del wm.attenRen_settings_collVisibility
-    del wm.attenRen_settings_objVisibility
-    del wm.attenRen_settings_missingFiles
-    del wm.attenRen_settings_renderRegion
-    del wm.attenRen_settings_resolutionPercentage
-    del wm.attenRen_settings_samples
-    del wm.attenRen_settings_instance
-    del wm.attenRen_settings_modifiers
-    del wm.attenRen_settings_composite
-    del wm.attenRen_settings_particleShowEmitter
-    del wm.attenRen_settings_particleChildAmount
-    del wm.attenRen_settings_particleDisplayPercentage
-    del wm.attenRen_settings_gpencilModifiers
-    del wm.attenRen_settings_gpencilShaderEffects
-    del wm.attenRen_settings_autoCheck
+    del wm.attenRen_prefs_currentScene
+    del wm.attenRen_prefs_currentViewLayer
+    del wm.attenRen_prefs_collVisibility
+    del wm.attenRen_prefs_objVisibility
+    del wm.attenRen_prefs_missingFiles
+    del wm.attenRen_prefs_renderRegion
+    del wm.attenRen_prefs_resolutionPercentage
+    del wm.attenRen_prefs_samples
+    del wm.attenRen_prefs_instance
+    del wm.attenRen_prefs_modifiers
+    del wm.attenRen_prefs_composite
+    del wm.attenRen_prefs_particleShowEmitter
+    del wm.attenRen_prefs_particleChildAmount
+    del wm.attenRen_prefs_particleDisplayPercentage
+    del wm.attenRen_prefs_gpencilModifiers
+    del wm.attenRen_prefs_gpencilShaderEffects
+    del wm.attenRen_prefs_autoCheck
 
 # def topbarAppend(self, context):
 #     layout = self.layout
 #     layout.separator()
-#     layout.prop(context.window_manager, "attenRen_settings_autoCheck")
+#     layout.prop(context.window_manager, "attenRen_prefs_autoCheck")
 
 # @persistent
 # def autoCheckHandler(scene):
-#     if scene.attenRen_settings_autoCheck:
+#     if scene.attenRen_prefs_autoCheck:
 #         bpy.ops.attenren.check()
 #         # if scene.attenRen:
-#         #     # self.report({'ERROR'}, bpy.app.translations.pgettext("Problems Detected"))
+#         #     # self.report({'ERROR'}, bpy.app.translations.pgettext_iface("Problems Detected"))
 #         #     # bpy.context.window_manager.popup_menu(autoCheckPopUp, title="AttentiveRendering", icon='INFO')
 #         #     bpy.context.window_manager.invoke_popup(autoCheckPopUp)
 #         # else:
 #         #     pass
 #         #     # bpy.context.window_manager.popup_menu(autoCheckPopUp, title="AttentiveRendering", icon='INFO')
-#         #     # self.report({'INFO'}, bpy.app.translations.pgettext("No Problems Detected"))
+#         #     # self.report({'INFO'}, bpy.app.translations.pgettext_iface("No Problems Detected"))
+@persistent
+def resetDataHandler(scene):
+    bpy.context.window_manager.attenRen.checkedItems.clear()
+    bpy.context.window_manager.attenRen.missingFiles.clear()
+    bpy.context.window_manager.attenRen.notCheckedYet = True
 
 classes = [
     main.ATTENREN_OT_Check,
@@ -185,7 +204,7 @@ classes = [
     main.ATTENREN_OT_MatchVisibility,
     main.ATTENREN_OT_ToggleVisibilityInPanel,
     main.ATTENREN_PT_Menu,
-    main.ATTENREN_PT_Menu_Settings,
+    main.ATTENREN_PT_Menu_Prefs,
 ]
 
 def register():
@@ -194,6 +213,7 @@ def register():
     initProps()
     # bpy.types.TOPBAR_MT_render.append(topbarAppend)
     bpy.app.translations.register(__name__, translations.translationDict)
+    bpy.app.handlers.load_pre.append(resetDataHandler)
     # bpy.app.handlers.render_pre.append(autoCheckHandler)
 
 def unregister():

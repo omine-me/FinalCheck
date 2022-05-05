@@ -41,14 +41,6 @@ class AttenRen:
             ...,
         }
         """
-        # settingFilePath = os.path.join(os.path.dirname(__file__), "attenrenSettings.txt")
-        # if os.path.exists(settingFilePath):
-        #     with open(settingFilePath, encoding='utf-8') as f:
-        #         scene = bpy.context.scene
-        #         settings = json.load(f)
-        #         for key, val in settings.items():
-        #             setattr(scene, key, val) 
-
     def clearRenderRegion(self, renderSettings):
         renderSettings.border_max_x = 1.
         renderSettings.border_max_y = 1.
@@ -60,7 +52,7 @@ class AttenRen:
         wm = bpy.context.window_manager
         addToObjsDict = False
         objDict = {"hide": False}
-        if wm.attenRen_settings_objVisibility:
+        if wm.attenRen_prefs_objVisibility:
             if self.VISIB_MODE == "EYE":
                 if not obj.hide_get(view_layer=vl) == obj.hide_render:
                     addToObjsDict = True
@@ -77,27 +69,27 @@ class AttenRen:
                     objDict = {"hide": False}
         modifiersDict = {}
         for mod in obj.modifiers:
-            if wm.attenRen_settings_modifiers and mod.show_render != mod.show_viewport:
+            if wm.attenRen_prefs_modifiers and mod.show_render != mod.show_viewport:
                 addToObjsDict = True
                 modifiersDict[mod] = {"hide": False}
             if mod.type == "PARTICLE_SYSTEM":
-                if wm.attenRen_settings_particleShowEmitter and (obj.show_instancer_for_viewport != obj.show_instancer_for_render):
+                if wm.attenRen_prefs_particleShowEmitter and (obj.show_instancer_for_viewport != obj.show_instancer_for_render):
                     addToObjsDict = True
                     if not modifiersDict[mod]: modifiersDict[mod] = {"hide": False}
                     modifiersDict[mod]["show_emitter"] = obj
                 settings = mod.particle_system.settings
-                if wm.attenRen_settings_particleChildAmount and settings.child_type != "NONE" and (settings.child_nbr != settings.rendered_child_count):
+                if wm.attenRen_prefs_particleChildAmount and settings.child_type != "NONE" and (settings.child_nbr != settings.rendered_child_count):
                     addToObjsDict = True
                     if not modifiersDict[mod]: modifiersDict[mod] = {"hide": False}
                     modifiersDict[mod]["child_amount"] = settings
-                if wm.attenRen_settings_particleDisplayPercentage and settings.display_percentage != 100:
+                if wm.attenRen_prefs_particleDisplayPercentage and settings.display_percentage != 100:
                     addToObjsDict = True
                     if not modifiersDict[mod]: modifiersDict[mod] = {"hide": False}
                     modifiersDict[mod]["display_percentage"] = settings
         objDict["mods"] = modifiersDict
 
         fxsDict = {}
-        if wm.attenRen_settings_gpencilShaderEffects:
+        if wm.attenRen_prefs_gpencilShaderEffects:
             for fx in obj.shader_effects:
                 if fx.show_render != fx.show_viewport:
                     addToObjsDict = True
@@ -105,14 +97,14 @@ class AttenRen:
         objDict["fxs"] = fxsDict
 
         gpfxsDict = {}
-        if wm.attenRen_settings_gpencilModifiers:
+        if wm.attenRen_prefs_gpencilModifiers:
             for gpfx in obj.grease_pencil_modifiers:
                 if gpfx.show_render != gpfx.show_viewport:
                     addToObjsDict = True
                     gpfxsDict[gpfx] = {}
         objDict["gpfxs"] = gpfxsDict
 
-        if wm.attenRen_settings_instance and\
+        if wm.attenRen_prefs_instance and\
            obj.instance_type != "NONE" and\
            (obj.show_instancer_for_viewport != obj.show_instancer_for_render):
             addToObjsDict = True
@@ -130,7 +122,7 @@ class AttenRen:
 
             for obj in child.collection.objects:
                 self.objectCheck(vl, objsDict, obj)
-            if bpy.context.window_manager.attenRen_settings_collVisibility:
+            if bpy.context.window_manager.attenRen_prefs_collVisibility:
                 if self.VISIB_MODE == "EYE":
                     pass
                     # if not obj.hide_get(view_layer=vl) == obj.hide_render:
@@ -153,33 +145,35 @@ class AttenRen:
 
     def check(self):
         self.notCheckedYet = False
-        scene = bpy.context.scene
         wm = bpy.context.window_manager
-        if wm.attenRen_settings_missingFiles:
+        if wm.attenRen_prefs_missingFiles:
             missingFiles = [os.path.normpath(bpy.path.abspath(image.filepath)) for image in bpy.data.images if (image.filepath) and (not os.path.exists(bpy.path.abspath(image.filepath)))]
             if missingFiles:
                 self.missingFiles["hide"] = False
                 self.missingFiles["files"] = missingFiles
 
         for scene in bpy.data.scenes:
+            if wm.attenRen_prefs_currentScene:
+                if scene.name != bpy.context.scene.name:
+                    continue
             sceneDict = {"hide":False}
             # Composite Node Check (alpha version)
-            if wm.attenRen_settings_composite and scene.use_nodes:
+            if wm.attenRen_prefs_composite and scene.use_nodes:
                 comp =  [node for node in scene.node_tree.nodes if node.bl_static_type == "COMPOSITE"]
                 viewer =  [node for node in scene.node_tree.nodes if node.bl_static_type == "VIEWER"]
                 if len(comp) == len(viewer) == 1 and len(comp[0].inputs[0].links) and len(viewer[0].inputs[0].links):
                     if comp[0].inputs[0].links[0].from_node.name != viewer[0].inputs[0].links[0].from_node.name:
                         sceneDict["composite"] = {}
-            if (wm.attenRen_settings_renderRegion and
+            if (wm.attenRen_prefs_renderRegion and
                 (scene.render.border_max_x != 1. or
                 scene.render.border_max_y != 1. or
                 scene.render.border_min_x != 0. or
                 scene.render.border_min_y != 0.)):
                 sceneDict["border"] = scene.render
-            if wm.attenRen_settings_resolutionPercentage and scene.render.resolution_percentage < 100:
+            if wm.attenRen_prefs_resolutionPercentage and scene.render.resolution_percentage < 100:
                 sceneDict["resolution_percentage"] = scene.render
             # Check if render samples are fewer than preview samples
-            if wm.attenRen_settings_samples:
+            if wm.attenRen_prefs_samples:
                 if scene.render.engine == "CYCLES":
                     if scene.cycles.progressive == "PATH":
                         if scene.cycles.samples < scene.cycles.preview_samples:
@@ -193,6 +187,9 @@ class AttenRen:
 
             vlsDict = {}
             for vl in scene.view_layers:
+                if wm.attenRen_prefs_currentScene and wm.attenRen_prefs_currentViewLayer:
+                    if vl.name != bpy.context.view_layer.name:
+                        continue
                 vlDict = {"hide":False}
                 collsDict = {}
                 # This is for Scene's Master Collection
@@ -275,27 +272,29 @@ class AttenRen:
                             else:
                                 coll.hide_viewport = coll.collection.hide_viewport = False
 
-    def saveSettings(self):
-        settingFilePath = os.path.join(os.path.dirname(__file__), "attenrenSettings.txt")
-        # if not os.path.exists(settingFilePath):
+    def savePrefs(self):
+        prefFilePath = os.path.join(os.path.dirname(__file__), "attenrenPrefs.txt")
+        # if not os.path.exists(prefFilePath):
         types = bpy.types.WindowManager
         wm = bpy.context.window_manager
-        settings = {
-            types.attenRen_settings_collVisibility.keywords["attr"]: wm.attenRen_settings_collVisibility,
-            types.attenRen_settings_objVisibility.keywords["attr"]: wm.attenRen_settings_objVisibility,
-            types.attenRen_settings_missingFiles.keywords["attr"]: wm.attenRen_settings_missingFiles,
-            types.attenRen_settings_renderRegion.keywords["attr"]: wm.attenRen_settings_renderRegion,
-            types.attenRen_settings_resolutionPercentage.keywords["attr"]: wm.attenRen_settings_resolutionPercentage,
-            types.attenRen_settings_samples.keywords["attr"]: wm.attenRen_settings_samples,
-            types.attenRen_settings_instance.keywords["attr"]: wm.attenRen_settings_instance,
-            types.attenRen_settings_modifiers.keywords["attr"]: wm.attenRen_settings_modifiers,
-            types.attenRen_settings_composite.keywords["attr"]: wm.attenRen_settings_composite,
-            types.attenRen_settings_particleShowEmitter.keywords["attr"]: wm.attenRen_settings_particleShowEmitter,
-            types.attenRen_settings_particleChildAmount.keywords["attr"]: wm.attenRen_settings_particleChildAmount,
-            types.attenRen_settings_particleDisplayPercentage.keywords["attr"]: wm.attenRen_settings_particleDisplayPercentage,
-            types.attenRen_settings_gpencilModifiers.keywords["attr"]: wm.attenRen_settings_gpencilModifiers,
-            types.attenRen_settings_gpencilShaderEffects.keywords["attr"]: wm.attenRen_settings_gpencilShaderEffects,
-            types.attenRen_settings_autoCheck.keywords["attr"]: wm.attenRen_settings_autoCheck
+        prefs = {
+            types.attenRen_prefs_currentScene.keywords["attr"]: wm.attenRen_prefs_currentScene,
+            types.attenRen_prefs_currentViewLayer.keywords["attr"]: wm.attenRen_prefs_currentViewLayer,
+            types.attenRen_prefs_collVisibility.keywords["attr"]: wm.attenRen_prefs_collVisibility,
+            types.attenRen_prefs_objVisibility.keywords["attr"]: wm.attenRen_prefs_objVisibility,
+            types.attenRen_prefs_missingFiles.keywords["attr"]: wm.attenRen_prefs_missingFiles,
+            types.attenRen_prefs_renderRegion.keywords["attr"]: wm.attenRen_prefs_renderRegion,
+            types.attenRen_prefs_resolutionPercentage.keywords["attr"]: wm.attenRen_prefs_resolutionPercentage,
+            types.attenRen_prefs_samples.keywords["attr"]: wm.attenRen_prefs_samples,
+            types.attenRen_prefs_instance.keywords["attr"]: wm.attenRen_prefs_instance,
+            types.attenRen_prefs_modifiers.keywords["attr"]: wm.attenRen_prefs_modifiers,
+            types.attenRen_prefs_composite.keywords["attr"]: wm.attenRen_prefs_composite,
+            types.attenRen_prefs_particleShowEmitter.keywords["attr"]: wm.attenRen_prefs_particleShowEmitter,
+            types.attenRen_prefs_particleChildAmount.keywords["attr"]: wm.attenRen_prefs_particleChildAmount,
+            types.attenRen_prefs_particleDisplayPercentage.keywords["attr"]: wm.attenRen_prefs_particleDisplayPercentage,
+            types.attenRen_prefs_gpencilModifiers.keywords["attr"]: wm.attenRen_prefs_gpencilModifiers,
+            types.attenRen_prefs_gpencilShaderEffects.keywords["attr"]: wm.attenRen_prefs_gpencilShaderEffects,
+            types.attenRen_prefs_autoCheck.keywords["attr"]: wm.attenRen_prefs_autoCheck
         }
-        with open(settingFilePath, 'w', encoding='utf-8', newline='\n') as fp:
-            json.dump(settings, fp, indent=2)
+        with open(prefFilePath, 'w', encoding='utf-8', newline='\n') as fp:
+            json.dump(prefs, fp, indent=2)
