@@ -1,6 +1,6 @@
 # AttentiveRendering - Blender Addon
 日本語版は下にあります。/ Japanese version below.
-### NO MORE Rendering Failures!
+## NO MORE Rendering Failures!
 This addon detects problems in your project and make your render successful.
 
 [Download From Here](https://example.com)
@@ -10,10 +10,17 @@ Do you ever have to re-render your scene because of a small mistake?
 This addon detects various problems of your project and suggest corrections.
 Check with a single button and make it more efficient.
 
+### Environment
+#### Compatible Blender Versions
+* Blender 2.80 or later
+
+#### Languages
+* English, Japanese
+
 ## Installation
-### Download
+#### Download
 Download a .zip file from [here](https://example.com).
-### Installation
+#### Installation
 Install the addon from Edit -> Preferences... -> Add-ons -> Install...  
 You don't have to extract zip file.
 
@@ -47,7 +54,7 @@ If you find bugs or have an opinion, let me know in issues or my [Twitter](https
 Thanks for using AttentiveRendering.
 
 ---
-### レンダリングの失敗をなくそう！
+## レンダリングの失敗をなくそう！
 このアドオンは、Blenderファイルの問題を検出し、レンダリングを一発で成功させます。
 
 [ダウンロードはここから](https://example.com)
@@ -57,10 +64,17 @@ Thanks for using AttentiveRendering.
 このアドオンを使えば、ファイルの問題を見つけ出し、簡単に修正できます。  
 ボタン一つで制作を効率化しましょう。
 
+### 環境
+#### 利用可能なBlenderのバージョン
+* Blender 2.80 以降
+
+#### 言語
+* 日本語, 英語
+
 ## インストール
-### ダウンロード
+#### ダウンロード
 [ここ](https://example.com)からzipファイルをダウンロードします。
-### インストール
+#### インストール
 編集 -> プリファレンス... -> アドオン -> インストール... からインストールします。
 zipファイルを展開する必要はありません。
 
