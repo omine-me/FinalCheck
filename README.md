@@ -32,7 +32,7 @@ In Preferences sub-panel, you can toggle which items will be checked. These pref
 * **Samples**: Is the render sample under the preview samples?
 * **Instancing**: Does visibility of instancer in viewports and renders differ?
 * **Modifiers**: Does visibility of modifiers in viewports and renders differ?
-* **Composite** (alpha version): Do a inputs of viewer node and composite node differ?
+* **Composite** (alpha version): Do a inputs of viewer node and composite node differ?  
 Composite checking is currently incomplete due to limitations of the Blender Python API.
 * **Particles: Show Emitter**: Does visibility of particles in viewports and renders differ?
 * **Particles: Child Amount**: Does child amount of particles in viewports and renders differ?
