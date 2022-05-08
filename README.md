@@ -90,6 +90,5 @@ zipファイルを展開する必要はありません。
 プリファレンスから、全てのシーンをチェックするか、現在のシーン/ビューレイヤーをチェックするかも選択できます。
 
 ### フィードバック
-If you find bugs or have an opinion, let me know in issues or my Twitter.
 バグやご意見は、issuesや[ツイッター](https://twitter.com/mineBeReal)からお願いします。
 改善案も歓迎です。
