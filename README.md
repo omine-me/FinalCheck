@@ -33,13 +33,13 @@ In Preferences sub-panel, you can toggle which items will be checked. These pref
 ### Checking Statuses  
 * **Collections Visibility**: Does visibility of collections in viewports and renders differ (check based on eye's icon, monitor's icon, and camera's icon)?
 * **Objects Visibility**: Does visibility of objects in viewports and renders differ (check based on eye's icon, monitor's icon, and camera's icon)?
-* **Missing Files**: Are image paths broken?
+* **Missing Files**: Is an image path broken?
 * **Render Region**: Is render region set and the area reduced?
-* **Resolution%**: Is the resolution% under 100%?
-* **Samples**: Is the render sample under the preview samples?
+* **Resolution%**: Is resolution% under 100%?
+* **Samples**: Is render samples under preview samples?
 * **Instancing**: Does visibility of instancer in viewports and renders differ?
 * **Modifiers**: Does visibility of modifiers in viewports and renders differ?
-* **Composite** (alpha version): Do a inputs of viewer node and composite node differ?  
+* **Composite** (alpha version): Do inputs of viewer node and composite node differ?  
 Composite checking is currently incomplete due to limitations of the Blender Python API.
 * **Particles: Show Emitter**: Does visibility of particles in viewports and renders differ?
 * **Particles: Child Amount**: Does child amount of particles in viewports and renders differ?
@@ -101,7 +101,7 @@ zipファイルを展開する必要はありません。
 * **グリースペンシル: モディファイア**: ビューポートとレンダーでモディファイアの可視性が異なるか。
 * **グリースペンシル: エフェクト**: ビューポートとレンダーでエフェクトの可視性が異なるか。
 
-プリファレンスから、全てのシーンをチェックするか、現在のシーン/ビューレイヤーをチェックするかも選択できます。
+プリファレンスから、全てのシーンをチェックするか、現在のシーン/ビューレイヤーのみをチェックするかも選択できます。
 
 ### フィードバック
 バグやご意見は、issuesや[ツイッター](https://twitter.com/mineBeReal)からお願いします。
