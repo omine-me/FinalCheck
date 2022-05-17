@@ -15,7 +15,7 @@ Check with a single button and make it more efficient.
 
 ### Environment
 #### Compatible Blender Versions
-* Blender 2.80 or later
+* Blender 2.90 or later
 
 #### Languages
 * English, Japanese
@@ -82,7 +82,7 @@ Distributed under the MIT License.
 
 ### 環境
 #### 利用可能なBlenderのバージョン
-* Blender 2.80 以降
+* Blender 2.90 以降
 
 #### 言語
 * 日本語, 英語
