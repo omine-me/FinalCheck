@@ -1,224 +1,259 @@
 bl_info = {
-    "name": "Attentive Rendering",
-    "author": "Omine Taisei",
+    "name": "FinalCheck",
+    "author": "Taisei Omine",
     "version": (0, 1),
     "blender": (2, 80, 0),
     "location": "3D Viewport",
-    "description": "This Addon detects problems of your project and make your rendering more efficient",
+    "description": "This addon detects problems of your project and make your rendering more efficient",
     "warning": "",
-    "support": "TESTING",
-    "doc_url": "",
-    "tracker_url": "",
+    "support": "COMMUNITY",
+    "doc_url": "https://github.com/omine-me/FinalCheck",
+    "tracker_url": "https://github.com/omine-me/FinalCheck/issues",
     "category": "Interface"
 }
 
 if "bpy" in locals():
     import imp
     imp.reload(main)
-    imp.reload(attenRenClass)
+    imp.reload(finalCheckClass)
     imp.reload(translations)
 else:
     from . import main
-    from . import attenRenClass
+    from . import finalCheckClass
     from . import translations
 
 import bpy, os, json
 from bpy.app.handlers import persistent
 from bpy.props import (
-    IntProperty,
-    FloatProperty,
-    # FloatVectorProperty,
-    # EnumProperty,
     BoolProperty,
-    StringProperty,
-    PointerProperty,
 )
 
 def updatePrefs(self, context):
-    context.window_manager.attenRen.savePrefs()
+    context.window_manager.finalCheck.savePrefs()
 
 def initProps():
     wm = bpy.types.WindowManager
     prefs = []
+    trans=bpy.app.translations.pgettext_tip
 
-    ### this should be in __init__ of attenRenClass but raise error, so done here 
-    prefsFilePath = os.path.join(os.path.dirname(__file__), "attenrenPrefs.txt")
+    ### this may be in __init__ of finalCheckClass but raise error, so done here 
+    prefsFilePath = os.path.join(os.path.dirname(__file__), "FinalCheckPrefs.txt")
     if os.path.exists(prefsFilePath):
         with open(prefsFilePath, encoding='utf-8') as f:
             prefs = json.load(f)
     ###
 
-    wm.attenRen_prefs_currentScene = BoolProperty(
+    wm.finalCheck_prefs_currentScene = BoolProperty(
         name="Current Scene Only",
-        default=prefs["attenRen_prefs_currentScene"]\
-                if "attenRen_prefs_currentScene" in prefs else False,
+        default=prefs["finalCheck_prefs_currentScene"]\
+                if "finalCheck_prefs_currentScene" in prefs else False,
+        description=trans("Check Current Scene Only"),
         update=updatePrefs,
     )
-    wm.attenRen_prefs_currentViewLayer = BoolProperty(
+    wm.finalCheck_prefs_currentViewLayer = BoolProperty(
         name="Current View Layer Only",
-        default=prefs["attenRen_prefs_currentViewLayer"]\
-                if "attenRen_prefs_currentViewLayer" in prefs else False,
+        default=prefs["finalCheck_prefs_currentViewLayer"]\
+                if "finalCheck_prefs_currentViewLayer" in prefs else False,
+        description=trans("Check Current View Layer Only (When Current Scene Only Is True)"),
         update=updatePrefs,
     )
-    wm.attenRen_prefs_collVisibility = BoolProperty(
+    wm.finalCheck_prefs_collVisibility = BoolProperty(
         name="Collections Visibiiity",
-        default=prefs["attenRen_prefs_collVisibility"]\
-                if "attenRen_prefs_collVisibility" in prefs else True,
+        default=prefs["finalCheck_prefs_collVisibility"]\
+                if "finalCheck_prefs_collVisibility" in prefs else True,
+        description=trans("Does Visibility of Collections in Viewports and Renders Differ?"),
         update=updatePrefs,
     )
-    wm.attenRen_prefs_objVisibility = BoolProperty(
+    wm.finalCheck_prefs_objVisibility = BoolProperty(
         name="Objects Visibiiity",
-        default=prefs["attenRen_prefs_objVisibility"]\
-                if "attenRen_prefs_objVisibility" in prefs else True,
+        default=prefs["finalCheck_prefs_objVisibility"]\
+                if "finalCheck_prefs_objVisibility" in prefs else True,
+        description=trans("Does Visibility of Objects in Viewports and Renders Differ?"),
         update=updatePrefs,
     )
-    wm.attenRen_prefs_missingFiles = BoolProperty(
+    wm.finalCheck_prefs_missingFiles = BoolProperty(
         name="Missing Files",
-        default=prefs["attenRen_prefs_missingFiles"]\
-                if "attenRen_prefs_missingFiles" in prefs else True,
+        default=prefs["finalCheck_prefs_missingFiles"]\
+                if "finalCheck_prefs_missingFiles" in prefs else True,
+        description=trans("Is an Image Path Broken?"),
         update=updatePrefs,
     )
-    wm.attenRen_prefs_renderRegion = BoolProperty(
+    wm.finalCheck_prefs_renderRegion = BoolProperty(
         name="Render Region",
-        default=prefs["attenRen_prefs_renderRegion"]\
-                if "attenRen_prefs_renderRegion" in prefs else True,
+        default=prefs["finalCheck_prefs_renderRegion"]\
+                if "finalCheck_prefs_renderRegion" in prefs else True,
+        description=trans("Is Render Region Set and the Area Reduced?"),
         update=updatePrefs,
     )
-    wm.attenRen_prefs_resolutionPercentage = BoolProperty(
+    wm.finalCheck_prefs_resolutionPercentage = BoolProperty(
         name="Resolution %",
-        default=prefs["attenRen_prefs_resolutionPercentage"]\
-                if "attenRen_prefs_resolutionPercentage" in prefs else True,
+        default=prefs["finalCheck_prefs_resolutionPercentage"]\
+                if "finalCheck_prefs_resolutionPercentage" in prefs else True,
+        description=trans("Is Resolution% Under 100%?"),
         update=updatePrefs,
     )
-    wm.attenRen_prefs_samples = BoolProperty(
+    wm.finalCheck_prefs_samples = BoolProperty(
         name="Samples",
-        default=prefs["attenRen_prefs_samples"]\
-                if "attenRen_prefs_samples" in prefs else True,
+        default=prefs["finalCheck_prefs_samples"]\
+                if "finalCheck_prefs_samples" in prefs else True,
+        description=trans("Is Render Samples Under Preview Samples?"),
         update=updatePrefs,
     )
-    wm.attenRen_prefs_instance = BoolProperty(
+    wm.finalCheck_prefs_instance = BoolProperty(
         name="Instancing",
-        default=prefs["attenRen_prefs_instance"]\
-                if "attenRen_prefs_instance" in prefs else True,
+        default=prefs["finalCheck_prefs_instance"]\
+                if "finalCheck_prefs_instance" in prefs else True,
+        description=trans("Does Visibility of Instancer in Viewports and Renders Differ?"),
         update=updatePrefs,
     )
-    wm.attenRen_prefs_modifiers = BoolProperty(
+    wm.finalCheck_prefs_modifiers = BoolProperty(
         name="Modifiers",
-        default=prefs["attenRen_prefs_modifiers"]\
-                if "attenRen_prefs_modifiers" in prefs else True,
+        default=prefs["finalCheck_prefs_modifiers"]\
+                if "finalCheck_prefs_modifiers" in prefs else True,
+        description=trans("Does Visibility of Modifiers in Viewports and Renders Differ?"),
         update=updatePrefs,
     )
-    wm.attenRen_prefs_composite = BoolProperty(
+    wm.finalCheck_prefs_composite = BoolProperty(
         name="Composite",
-        default=prefs["attenRen_prefs_composite"]\
-                if "attenRen_prefs_composite" in prefs else False,
+        default=prefs["finalCheck_prefs_composite"]\
+                if "finalCheck_prefs_composite" in prefs else False,
+        description=trans("Do Inputs of Viewer Node and Composite Node Differ? This I Currently Incomplete Due to Limitations of The Blender Python API"),
         update=updatePrefs,
     )
-    wm.attenRen_prefs_particleShowEmitter = BoolProperty(
+    wm.finalCheck_prefs_particleShowEmitter = BoolProperty(
         name="Show Emitter",
-        default=prefs["attenRen_prefs_particleShowEmitter"]\
-                if "attenRen_prefs_particleShowEmitter" in prefs else True,
+        default=prefs["finalCheck_prefs_particleShowEmitter"]\
+                if "finalCheck_prefs_particleShowEmitter" in prefs else True,
+        description=trans("Does Visibility of Particle Emitter in Viewports and Renders Differ?"),
         update=updatePrefs,
     )
-    wm.attenRen_prefs_particleChildAmount = BoolProperty(
+    wm.finalCheck_prefs_particleChildAmount = BoolProperty(
         name="Child Amount",
-        default=prefs["attenRen_prefs_particleChildAmount"]\
-                if "attenRen_prefs_particleChildAmount" in prefs else True,
+        default=prefs["finalCheck_prefs_particleChildAmount"]\
+                if "finalCheck_prefs_particleChildAmount" in prefs else True,
+        description=trans("Does Child Amount of Particles in Viewports and Renders Differ?"),
         update=updatePrefs,
     )
-    wm.attenRen_prefs_particleDisplayPercentage = BoolProperty(
+    wm.finalCheck_prefs_particleDisplayPercentage = BoolProperty(
         name="Viewport Display Amount",
-        default=prefs["attenRen_prefs_particleDisplayPercentage"]\
-                if "attenRen_prefs_particleDisplayPercentage" in prefs else True,
+        default=prefs["finalCheck_prefs_particleDisplayPercentage"]\
+                if "finalCheck_prefs_particleDisplayPercentage" in prefs else True,
+        description=trans("Is Amount of Particles in Viewports Under 100%?"),
         update=updatePrefs,
     )
-    wm.attenRen_prefs_gpencilModifiers = BoolProperty(
+    wm.finalCheck_prefs_gpencilModifiers = BoolProperty(
         name="Modifiers",
-        default=prefs["attenRen_prefs_gpencilModifiers"]\
-                if "attenRen_prefs_gpencilModifiers" in prefs else True,
+        default=prefs["finalCheck_prefs_gpencilModifiers"]\
+                if "finalCheck_prefs_gpencilModifiers" in prefs else True,
+        description=trans("Does Visibility of Modifiers in Viewports and Renders Differ?"),
         update=updatePrefs,
     )
-    wm.attenRen_prefs_gpencilShaderEffects = BoolProperty(
+    wm.finalCheck_prefs_gpencilShaderEffects = BoolProperty(
         name="Effects",
-        default=prefs["attenRen_prefs_gpencilShaderEffects"]\
-                if "attenRen_prefs_gpencilShaderEffects" in prefs else True,
+        default=prefs["finalCheck_prefs_gpencilShaderEffects"]\
+                if "finalCheck_prefs_gpencilShaderEffects" in prefs else True,
+        description=trans("Does Visibility of Effects in Viewports and Renders Differ?"),
         update=updatePrefs,
     )
-    wm.attenRen_prefs_autoCheck = BoolProperty(
-        name="Auto Check before Render",
-        description=bpy.app.translations.pgettext_iface("Run AttentiveRendering Check Automatically before Rendering. (α Ver. Just Check and Refresh Addon Panel)"),
-        default=prefs["attenRen_prefs_autoCheck"]\
-                if "attenRen_prefs_autoCheck" in prefs else False,
-        update=updatePrefs,
-    )
-    wm.attenRen = attenRenClass.AttenRen()
+    wm.finalCheck = finalCheckClass.FinalCheck()
 
 def delProps():
     wm = bpy.types.WindowManager
-    del wm.attenRen
-    del wm.attenRen_prefs_currentScene
-    del wm.attenRen_prefs_currentViewLayer
-    del wm.attenRen_prefs_collVisibility
-    del wm.attenRen_prefs_objVisibility
-    del wm.attenRen_prefs_missingFiles
-    del wm.attenRen_prefs_renderRegion
-    del wm.attenRen_prefs_resolutionPercentage
-    del wm.attenRen_prefs_samples
-    del wm.attenRen_prefs_instance
-    del wm.attenRen_prefs_modifiers
-    del wm.attenRen_prefs_composite
-    del wm.attenRen_prefs_particleShowEmitter
-    del wm.attenRen_prefs_particleChildAmount
-    del wm.attenRen_prefs_particleDisplayPercentage
-    del wm.attenRen_prefs_gpencilModifiers
-    del wm.attenRen_prefs_gpencilShaderEffects
-    del wm.attenRen_prefs_autoCheck
+    del wm.finalCheck
+    del wm.finalCheck_prefs_currentScene
+    del wm.finalCheck_prefs_currentViewLayer
+    del wm.finalCheck_prefs_collVisibility
+    del wm.finalCheck_prefs_objVisibility
+    del wm.finalCheck_prefs_missingFiles
+    del wm.finalCheck_prefs_renderRegion
+    del wm.finalCheck_prefs_resolutionPercentage
+    del wm.finalCheck_prefs_samples
+    del wm.finalCheck_prefs_instance
+    del wm.finalCheck_prefs_modifiers
+    del wm.finalCheck_prefs_composite
+    del wm.finalCheck_prefs_particleShowEmitter
+    del wm.finalCheck_prefs_particleChildAmount
+    del wm.finalCheck_prefs_particleDisplayPercentage
+    del wm.finalCheck_prefs_gpencilModifiers
+    del wm.finalCheck_prefs_gpencilShaderEffects
 
-# def topbarAppend(self, context):
-#     layout = self.layout
-#     layout.separator()
-#     layout.prop(context.window_manager, "attenRen_prefs_autoCheck")
-
-# @persistent
-# def autoCheckHandler(scene):
-#     if scene.attenRen_prefs_autoCheck:
-#         bpy.ops.attenren.check()
-#         # if scene.attenRen:
-#         #     # self.report({'ERROR'}, bpy.app.translations.pgettext_iface("Problems Detected"))
-#         #     # bpy.context.window_manager.popup_menu(autoCheckPopUp, title="AttentiveRendering", icon='INFO')
-#         #     bpy.context.window_manager.invoke_popup(autoCheckPopUp)
-#         # else:
-#         #     pass
-#         #     # bpy.context.window_manager.popup_menu(autoCheckPopUp, title="AttentiveRendering", icon='INFO')
-#         #     # self.report({'INFO'}, bpy.app.translations.pgettext_iface("No Problems Detected"))
 @persistent
 def resetDataHandler(scene):
-    bpy.context.window_manager.attenRen.checkedItems.clear()
-    bpy.context.window_manager.attenRen.missingFiles.clear()
-    bpy.context.window_manager.attenRen.notCheckedYet = True
+    wm = bpy.context.window_manager
+    wm.finalCheck.checkedItems.clear()
+    wm.finalCheck.missingFiles.clear()
+    wm.finalCheck.notCheckedYet = True
+    prefsFilePath = os.path.join(os.path.dirname(__file__), "FinalCheckPrefs.txt")
+    if os.path.exists(prefsFilePath):
+        with open(prefsFilePath, encoding='utf-8') as f:
+            prefs = json.load(f)
+        try:
+            wm.finalCheck_prefs_currentScene = prefs["finalCheck_prefs_currentScene"]
+        except: pass
+        try:
+            wm.finalCheck_prefs_currentViewLayer = prefs["finalCheck_prefs_currentViewLayer"]
+        except: pass
+        try:
+            wm.finalCheck_prefs_collVisibility = prefs["finalCheck_prefs_collVisibility"]
+        except: pass
+        try:
+            wm.finalCheck_prefs_objVisibility = prefs["finalCheck_prefs_objVisibility"]
+        except: pass
+        try:
+            wm.finalCheck_prefs_missingFiles = prefs["finalCheck_prefs_missingFiles"]
+        except: pass
+        try:
+            wm.finalCheck_prefs_renderRegion = prefs["finalCheck_prefs_renderRegion"]
+        except: pass
+        try:
+            wm.finalCheck_prefs_resolutionPercentage = prefs["finalCheck_prefs_resolutionPercentage"]
+        except: pass
+        try:
+            wm.finalCheck_prefs_samples = prefs["finalCheck_prefs_samples"]
+        except: pass
+        try:
+            wm.finalCheck_prefs_instance = prefs["finalCheck_prefs_instance"]
+        except: pass
+        try:
+            wm.finalCheck_prefs_modifiers = prefs["finalCheck_prefs_modifiers"]
+        except: pass
+        try:
+            wm.finalCheck_prefs_composite = prefs["finalCheck_prefs_composite"]
+        except: pass
+        try:
+            wm.finalCheck_prefs_particleShowEmitter = prefs["finalCheck_prefs_particleShowEmitter"]
+        except: pass
+        try:
+            wm.finalCheck_prefs_particleChildAmount = prefs["finalCheck_prefs_particleChildAmount"]
+        except: pass
+        try:
+            wm.finalCheck_prefs_particleDisplayPercentage = prefs["finalCheck_prefs_particleDisplayPercentage"]
+        except: pass
+        try:
+            wm.finalCheck_prefs_gpencilModifiers = prefs["finalCheck_prefs_gpencilModifiers"]
+        except: pass
+        try:
+            wm.finalCheck_prefs_gpencilShaderEffects = prefs["finalCheck_prefs_gpencilShaderEffects"]
+        except: pass
 
 classes = [
-    main.ATTENREN_OT_Check,
-    main.ATTENREN_OT_SetObjHide,
-    main.ATTENREN_OT_ClearRenderRegion,
-    main.ATTENREN_OT_MatchVisibility,
-    main.ATTENREN_OT_ToggleVisibilityInPanel,
-    main.ATTENREN_PT_Menu,
-    main.ATTENREN_PT_Menu_Prefs,
+    main.FINALCHECK_OT_Check,
+    main.FINALCHECK_OT_SetObjHide,
+    main.FINALCHECK_OT_ClearRenderRegion,
+    main.FINALCHECK_OT_ToggleVisibilityInPanel,
+    main.FINALCHECK_PT_Menu,
+    main.FINALCHECK_PT_Menu_Prefs,
 ]
 
 def register():
     for c in classes:
         bpy.utils.register_class(c)
     initProps()
-    # bpy.types.TOPBAR_MT_render.append(topbarAppend)
     bpy.app.translations.register(__name__, translations.translationDict)
-    bpy.app.handlers.load_pre.append(resetDataHandler)
-    # bpy.app.handlers.render_pre.append(autoCheckHandler)
+    bpy.app.handlers.load_post.append(resetDataHandler) ### not load_pre because setting prefs doesn't work well.
 
 def unregister():
     bpy.app.translations.unregister(__name__)
-    # bpy.types.TOPBAR_MT_render.remove(topbarAppend)
     delProps()
     for c in classes:
         bpy.utils.unregister_class(c)

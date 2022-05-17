@@ -1,34 +1,29 @@
-from pprint import pprint 
 import bpy
 from _ctypes import PyObj_FromPtr
-from . import attenRenClass
 from bpy.props import (
-    PointerProperty,
-    BoolProperty,
     StringProperty,
-    IntProperty,
 )
 
-class ATTENREN_OT_Check(bpy.types.Operator):
-    bl_idname = "attenren.check"
+class FINALCHECK_OT_Check(bpy.types.Operator):
+    bl_idname = "finalcheck.check"
     bl_label = "Check"
     bl_description = bpy.app.translations.pgettext_tip("Detect Problems")
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        attenren = context.window_manager.attenRen
-        attenren.checkedItems.clear()
-        attenren.missingFiles.clear()
-        attenren.check()
+        finalCheck = context.window_manager.finalCheck
+        finalCheck.checkedItems.clear()
+        finalCheck.missingFiles.clear()
+        finalCheck.check()
 
-        if attenren.missingFiles or attenren.checkedItems:
+        if finalCheck.missingFiles or finalCheck.checkedItems:
             self.report({'WARNING'}, bpy.app.translations.pgettext_iface("Problems Detected"))
         else:
             self.report({'INFO'}, bpy.app.translations.pgettext_iface("No Problems Detected"))
         return {'FINISHED'}
 
-class ATTENREN_OT_SetObjHide(bpy.types.Operator):
-    bl_idname = "attenren.set_obj_hide"
+class FINALCHECK_OT_SetObjHide(bpy.types.Operator):
+    bl_idname = "finalcheck.set_obj_hide"
     bl_label = "Toggle Object"
     bl_description = bpy.app.translations.pgettext_tip("Toggle Visibility")
     bl_options = {'REGISTER', 'UNDO'}
@@ -59,22 +54,8 @@ class ATTENREN_OT_SetObjHide(bpy.types.Operator):
         obj.hide_set(not obj.hide_get(view_layer=vl), view_layer=vl)
         return {'FINISHED'}
 
-class ATTENREN_OT_MatchVisibility(bpy.types.Operator):
-    bl_idname = "attenren.match_visibility"
-    bl_label = "Match Visibility"
-    bl_description = bpy.app.translations.pgettext_tip("Match Visibility of All Collections, Objects, Modifiers and Effects to Viewport/Render")
-    bl_options = {'REGISTER', 'UNDO'}
-
-    matchTo: StringProperty(
-        name="to",
-        options={"HIDDEN"},
-    )
-    def execute(self, context):
-        context.window_manager.attenRen.matchVisibility(self.matchTo)
-        return {'FINISHED'}
-
-class ATTENREN_OT_ToggleVisibilityInPanel(bpy.types.Operator):
-    bl_idname = "attenren.toggle_visibility_in_panel"
+class FINALCHECK_OT_ToggleVisibilityInPanel(bpy.types.Operator):
+    bl_idname = "finalcheck.toggle_visibility_in_panel"
     bl_label = "Toggle Visibility"
     bl_description = bpy.app.translations.pgettext_tip("Toggle Visibility")
     bl_options = {'REGISTER', 'UNDO'}
@@ -88,8 +69,8 @@ class ATTENREN_OT_ToggleVisibilityInPanel(bpy.types.Operator):
         visibility["hide"] = not visibility["hide"]
         return {'FINISHED'}
 
-class ATTENREN_OT_ClearRenderRegion(bpy.types.Operator):
-    bl_idname = "attenren.clear_render_region"
+class FINALCHECK_OT_ClearRenderRegion(bpy.types.Operator):
+    bl_idname = "finalcheck.clear_render_region"
     bl_label = "Clear Render Region"
     bl_description = bpy.app.translations.pgettext_tip("Clear Render Region")
     bl_options = {'REGISTER', 'UNDO'}
@@ -100,17 +81,17 @@ class ATTENREN_OT_ClearRenderRegion(bpy.types.Operator):
     )
     def execute(self, context):
         renderSettings = PyObj_FromPtr(int(self.objId))
-        context.window_manager.attenRen.clearRenderRegion(renderSettings)
+        context.window_manager.finalCheck.clearRenderRegion(renderSettings)
+        self.report({'INFO'}, bpy.app.translations.pgettext_iface("Render Region Cleared"))
         return {'FINISHED'}
 
-class AttenRenPanel:
+class FinalCheckPanel:
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = "AttentiveRendering"        #tab name
+    bl_category = "FinalCheck" #tab name
 
-class ATTENREN_PT_Menu(AttenRenPanel, bpy.types.Panel):
-    bl_label = "AttentiveRendering"         # header name
-    bl_idname = "ATTENREN_PT_Menu"
+class FINALCHECK_PT_Menu(FinalCheckPanel, bpy.types.Panel):
+    bl_label = "FinalCheck" #header name
 
     def getObjType(self, obj):
         type = obj.type
@@ -139,7 +120,8 @@ class ATTENREN_PT_Menu(AttenRenPanel, bpy.types.Panel):
         elif type == "EMPTY":
             if obj.empty_display_type == "IMAGE":
                 return "OUTLINER_OB_IMAGE"
-            elif not obj.field.type == "NONE":
+            ### empty which have never been force field doesn't have field.type
+            elif hasattr(obj.field, "type") and obj.field.type != "NONE":
                 return "OUTLINER_OB_FORCE_FIELD"
             elif obj.instance_type == "COLLECTION":
                 return "OUTLINER_OB_GROUP_INSTANCE"
@@ -155,193 +137,169 @@ class ATTENREN_PT_Menu(AttenRenPanel, bpy.types.Panel):
             return "OUTLINER_OB_SPEAKER"
         else:
             return "QUESTION"
-
+    
+    def separator(self, layout, iter, fac=1):
+        for _ in range(iter):
+            layout.separator(factor=fac)
 
     def draw(self, context):
         trans = bpy.app.translations.pgettext_iface
         layout = self.layout
-        layout.operator(ATTENREN_OT_Check.bl_idname, text=trans("Check"))
+        layout.operator(FINALCHECK_OT_Check.bl_idname, text=trans("Check"))
         row = layout.row(align=True)
-        row.operator(ATTENREN_OT_MatchVisibility.bl_idname, text=trans("Match To Viewport")).matchTo = "VIEWPORT"
-        row.operator(ATTENREN_OT_MatchVisibility.bl_idname, text=trans("Match To Render")).matchTo = "RENDER"
         layout.separator()
-        attenRen = context.window_manager.attenRen
-        missingFiles = attenRen.missingFiles
-        if not missingFiles and not attenRen.checkedItems and not attenRen.notCheckedYet:
-            row = layout.row(align=True)
-            row.alignment = "CENTER"
-            row.label(text=trans("No Problems Detected"))
-            return
-        if missingFiles and missingFiles["files"]:
-            row = layout.row(align=True)
-            row.operator(ATTENREN_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if missingFiles["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(missingFiles))
-            row.label(text=trans("Missing Files"))
-            if not missingFiles["hide"]:
-                for image in missingFiles["files"]:
-                    row = layout.row(align=True)
-                    row.separator(factor=2)
-                    row.label(text=image, icon="FILE_IMAGE", translate=False)
-        for scene, vls in attenRen.checkedItems.items():
-            row = layout.row(align=True)
-            row.alignment="LEFT"
-            # row.label(text="｜")
-            row.operator(ATTENREN_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if vls["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(vls))
-            row.label(text=scene.name, icon="SCENE_DATA", translate=False)
-            if vls["hide"]:
-                continue
-            if "border" in vls.keys():
+        finalCheck = context.window_manager.finalCheck
+        missingFiles = finalCheck.missingFiles
+        try:
+            if not missingFiles and not finalCheck.checkedItems and not finalCheck.notCheckedYet:
                 row = layout.row(align=True)
-                row.separator(factor=2)
-                row.label(text=trans("Render Region is Set"), icon="ERROR")
-                row.operator(ATTENREN_OT_ClearRenderRegion.bl_idname, text=trans("Clear")).objId = str(id(vls["border"]))
-            if "resolution_percentage" in vls.keys():
+                row.alignment = "CENTER"
+                row.label(text=trans("No Problems Detected"))
+                return
+            if missingFiles and "files" in missingFiles:
                 row = layout.row(align=True)
-                row.separator(factor=2)
-                row.label(text=trans("Resolution % is under 100%"), icon="ERROR")
-                row.prop(scene.render, "resolution_percentage")
-            if "cycles_sample" in vls.keys():
-                row = layout.row(align=True)
-                row.separator(factor=2)
-                sp = row.split(align=True,factor=0.5)
-                sp.label(text=trans("Render Samples are Less than Preview Samples"), icon="ERROR")
-                sp.prop(scene.cycles, "samples")
-                sp.prop(scene.cycles, "preview_samples")
-            elif "eevee_sample" in vls.keys():
-                row = layout.row(align=True)
-                row.separator(factor=2)
-                sp = row.split(align=True,factor=0.5)
-                sp.label(text=trans("Render Samples are Less than Preview Samples"), icon="ERROR")
-                sp.prop(scene.eevee, "taa_render_samples")
-                sp.prop(scene.eevee, "taa_samples")
-            elif "cycles_aa_sample" in vls.keys():
-                row = layout.row(align=True)
-                row.separator(factor=2)
-                sp = row.split(align=True,factor=0.5)
-                sp.label(text=trans("Render Samples are Less than Preview Samples"), icon="ERROR")
-                sp.prop(scene.cycles, "aa_samples")
-                sp.prop(scene.cycles, "preview_aa_samples")
-            if "composite" in vls.keys():
-                row = layout.row(align=True)
-                row.separator(factor=2)
-                row.label(text=trans("Input Sources of Composite Output and Viewer Output are Different"), icon="ERROR")
-
-            for vl, colls in vls["view_layers"].items():
-                row = layout.row(align=True)
-                row.separator(factor=2)
-                # row.separator_spacer()
-                row.operator(ATTENREN_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if colls["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(colls))
-                row.label(text=vl.name, icon="RENDERLAYERS", translate=False)
-                if colls["hide"]:
-                    continue
-                for i, (coll, objs) in enumerate(colls["colls"].items()):
-                    row = layout.row(align=True)
-                    row.separator(factor=2)
-                    row.separator(factor=2)
-                    # row.separator_spacer()
-                    # row.separator_spacer()
-                    row.operator(ATTENREN_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if objs["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(objs))
-                    if hasattr(coll, "collection"): #Master Collection doesn't have show/hide status.
-                        row.label(text=coll.name, icon="OUTLINER_COLLECTION", translate=False)
-                        row.prop(coll, "hide_viewport", icon_only=True,emboss=False)
-                        row.prop(coll.collection, "hide_viewport", icon_only=True,emboss=False)
-                        row.prop(coll.collection, "hide_render", icon_only=True,emboss=False)
-                    else:
-                        row.label(text=trans("Master Collection"), icon="OUTLINER_COLLECTION")
-                    if objs["hide"]:
-                        continue
-                    for obj, mods in objs["objs"].items():
+                row.operator(FINALCHECK_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if missingFiles["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(missingFiles))
+                row.label(text=trans("Missing Files"))
+                if not missingFiles["hide"]:
+                    for image in missingFiles["files"]:
                         row = layout.row(align=True)
                         row.separator(factor=2)
-                        row.separator(factor=2)
-                        row.separator(factor=2)
-                        # row.separator_spacer()
-                        row.operator(ATTENREN_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if mods["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(mods))
-                        row.label(text=obj.name, icon=self.getObjType(obj), translate=False)
-                        objHide = row.operator(ATTENREN_OT_SetObjHide.bl_idname, text="", icon="HIDE_ON" if obj.hide_get(view_layer=vl) else "HIDE_OFF",emboss=False)
-                        objHide.obj = obj.name
-                        objHide.scene = scene.name
-                        objHide.vl = vl.name
-                        row.prop(obj, "hide_viewport", icon_only=True,emboss=False)
-                        row.prop(obj, "hide_render", icon_only=True,emboss=False)
-                        if mods["hide"]:
-                            continue
-                        if "instance" in mods.keys():
-                            row = layout.row(align=True)
-                            row.separator(factor=2)
-                            row.separator(factor=2)
-                            row.separator(factor=2)
-                            row.separator(factor=2)
-                            row.label(icon="DOT")
-                            row.label(text=trans("Instancing"), icon="MOD_INSTANCE")
-                            row.prop(obj, "show_instancer_for_viewport", icon_only=True, icon="RESTRICT_VIEW_OFF" if obj.show_instancer_for_viewport else "RESTRICT_VIEW_ON",emboss=False)
-                            row.prop(obj, "show_instancer_for_render", icon_only=True, icon="RESTRICT_RENDER_OFF" if obj.show_instancer_for_render else "RESTRICT_RENDER_ON",emboss=False)
-                        for mod, value in mods["mods"].items():
-                            row = layout.row(align=True)
-                            row.separator(factor=2)
-                            row.separator(factor=2)
-                            row.separator(factor=2)
-                            row.separator(factor=2)
-                            row.operator(ATTENREN_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if value["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(value))
-                            row.label(text=mod.name, icon="MODIFIER", translate=False)
-                            row.prop(mod, "show_viewport", icon_only=True,emboss=False)
-                            row.prop(mod, "show_render", icon_only=True,emboss=False)
-                            if value["hide"]:
-                                continue
-                            if "show_emitter" in value:
-                                row = layout.row(align=True)
-                                row.separator(factor=2)
-                                row.separator(factor=2)
-                                row.separator(factor=2)
-                                row.separator(factor=2)
-                                row.separator(factor=2)
-                                row.label(icon="DOT")
-                                row.label(text=trans("Show Emitter"), icon="PARTICLES")
-                                row.prop(value["show_emitter"], "show_instancer_for_viewport", icon="RESTRICT_VIEW_OFF" if obj.show_instancer_for_viewport else "RESTRICT_VIEW_ON", icon_only=True,emboss=False)
-                                row.prop(value["show_emitter"], "show_instancer_for_render", icon="RESTRICT_RENDER_OFF" if obj.show_instancer_for_render else "RESTRICT_RENDER_ON", icon_only=True,emboss=False)
-                            if "child_amount" in value:
-                                row = layout.row(align=True)
-                                row.separator(factor=2)
-                                row.separator(factor=2)
-                                row.separator(factor=2)
-                                row.separator(factor=2)
-                                row.separator(factor=2)
-                                row.label(icon="DOT")
-                                row.label(text=trans("Child Amount"), icon="PARTICLES")
-                                row.prop(value["child_amount"], "child_nbr")
-                                row.prop(value["child_amount"], "rendered_child_count")
-                            if "display_percentage" in value:
-                                row = layout.row(align=True)
-                                row.separator(factor=2)
-                                row.separator(factor=2)
-                                row.separator(factor=2)
-                                row.separator(factor=2)
-                                row.separator(factor=2)
-                                row.label(icon="DOT")
-                                row.label(text=trans("Viewport Display Amount"), icon="PARTICLES")
-                                row.prop(value["display_percentage"], "display_percentage")
-                        for gpfx, value in mods["gpfxs"].items():
-                            row = layout.row(align=True)
-                            row.separator(factor=2)
-                            row.separator(factor=2)
-                            row.separator(factor=2)
-                            row.separator(factor=2)
-                            row.label(icon="DOT")
-                            row.label(text=gpfx.name, icon="MODIFIER", translate=False)
-                            row.prop(gpfx, "show_viewport", icon_only=True,emboss=False)
-                            row.prop(gpfx, "show_render", icon_only=True,emboss=False)
-                        for fx, value in mods["fxs"].items():
-                            row = layout.row(align=True)
-                            row.separator(factor=2)
-                            row.separator(factor=2)
-                            row.separator(factor=2)
-                            row.separator(factor=2)
-                            row.label(icon="DOT")
-                            row.label(text=fx.name, icon="SHADERFX", translate=False)
-                            row.prop(fx, "show_viewport", icon_only=True,emboss=False)
-                            row.prop(fx, "show_render", icon_only=True,emboss=False)
+                        row.label(text=image, icon="FILE_IMAGE", translate=False)
+            for scene, vls in finalCheck.checkedItems.items():
+                row = layout.row(align=True)
+                row.alignment="LEFT"
+                row.operator(FINALCHECK_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if vls["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(vls))
+                row.label(text=scene.name, icon="SCENE_DATA", translate=False)
+                if vls["hide"]:
+                    continue
+                if "border" in vls.keys():
+                    row = layout.row(align=True)
+                    row.separator(factor=2)
+                    row.label(text=trans("Render Region is Set"), icon="ERROR")
+                    row.operator(FINALCHECK_OT_ClearRenderRegion.bl_idname, text=trans("Clear")).objId = str(id(vls["border"]))
+                if "resolution_percentage" in vls.keys():
+                    row = layout.row(align=True)
+                    row.separator(factor=2)
+                    row.label(text=trans("Resolution % is under 100%"), icon="ERROR")
+                    row.prop(scene.render, "resolution_percentage")
+                if "cycles_sample" in vls.keys():
+                    row = layout.row(align=True)
+                    row.separator(factor=2)
+                    sp = row.split(align=True,factor=.5)
+                    sp.label(text=trans("Render Samples are Less than Preview Samples"), icon="ERROR")
+                    sp.prop(scene.cycles, "preview_samples")
+                    sp.prop(scene.cycles, "samples")
+                elif "eevee_sample" in vls.keys():
+                    row = layout.row(align=True)
+                    row.separator(factor=2)
+                    sp = row.split(align=True,factor=.5)
+                    sp.label(text=trans("Render Samples are Less than Preview Samples"), icon="ERROR")
+                    sp.prop(scene.eevee, "taa_samples")
+                    sp.prop(scene.eevee, "taa_render_samples")
+                elif "cycles_aa_sample" in vls.keys():
+                    row = layout.row(align=True)
+                    row.separator(factor=2)
+                    sp = row.split(align=True,factor=.5)
+                    sp.label(text=trans("Render Samples are Less than Preview Samples"), icon="ERROR")
+                    sp.prop(scene.cycles, "preview_aa_samples")
+                    sp.prop(scene.cycles, "aa_samples")
+                if "composite" in vls.keys():
+                    row = layout.row(align=True)
+                    row.separator(factor=2)
+                    row.label(text=trans("Input Sources of Composite Output and Viewer Output are Different"), icon="ERROR")
 
-class ATTENREN_PT_Menu_Prefs(AttenRenPanel, bpy.types.Panel):
-    bl_parent_id = "ATTENREN_PT_Menu"
+                if "view_layers" in vls.keys():
+                    for vl, colls in vls["view_layers"].items():
+                        row = layout.row(align=True)
+                        row.separator(factor=2)
+                        row.operator(FINALCHECK_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if colls["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(colls))
+                        row.label(text=vl.name, icon="RENDERLAYERS", translate=False)
+                        if colls["hide"]:
+                            continue
+                        for coll, objs in colls["colls"].items():
+                            row = layout.row(align=True)
+                            self.separator(row, 2, 2)
+                            row.operator(FINALCHECK_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if objs["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(objs))
+                            if hasattr(coll, "collection"): #Master Collection doesn't have show/hide status.
+                                row.label(text=coll.name, icon="OUTLINER_COLLECTION", translate=False)
+                                row.prop(coll, "hide_viewport", icon_only=True,emboss=False)
+                                row.prop(coll.collection, "hide_viewport", icon_only=True,emboss=False)
+                                row.prop(coll.collection, "hide_render", icon_only=True,emboss=False)
+                            else:
+                                row.label(text=trans("Master Collection"), icon="OUTLINER_COLLECTION")
+                            if objs["hide"]:
+                                continue
+                            for obj, mods in objs["objs"].items():
+                                row = layout.row(align=True)
+                                self.separator(row, 3, 2)
+                                row.operator(FINALCHECK_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if mods["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(mods))
+                                row.label(text=obj.name, icon=self.getObjType(obj), translate=False)
+                                objHide = row.operator(FINALCHECK_OT_SetObjHide.bl_idname, text="", icon="HIDE_ON" if obj.hide_get(view_layer=vl) else "HIDE_OFF",emboss=False)
+                                objHide.obj = obj.name
+                                objHide.scene = scene.name
+                                objHide.vl = vl.name
+                                row.prop(obj, "hide_viewport", icon_only=True,emboss=False)
+                                row.prop(obj, "hide_render", icon_only=True,emboss=False)
+                                if mods["hide"]:
+                                    continue
+                                if "instance" in mods.keys():
+                                    row = layout.row(align=True)
+                                    self.separator(row, 4, 2)
+                                    row.label(icon="DOT")
+                                    row.label(text=trans("Instancing"), icon="MOD_INSTANCE")
+                                    row.prop(obj, "show_instancer_for_viewport", icon_only=True, icon="RESTRICT_VIEW_OFF" if obj.show_instancer_for_viewport else "RESTRICT_VIEW_ON",emboss=False)
+                                    row.prop(obj, "show_instancer_for_render", icon_only=True, icon="RESTRICT_RENDER_OFF" if obj.show_instancer_for_render else "RESTRICT_RENDER_ON",emboss=False)
+                                for mod, value in mods["mods"].items():
+                                    row = layout.row(align=True)
+                                    self.separator(row, 4, 2)
+                                    row.operator(FINALCHECK_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if value["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(value))
+                                    row.label(text=mod.name, icon="MODIFIER", translate=False)
+                                    row.prop(mod, "show_viewport", icon_only=True,emboss=False)
+                                    row.prop(mod, "show_render", icon_only=True,emboss=False)
+                                    if value["hide"]:
+                                        continue
+                                    if "show_emitter" in value:
+                                        row = layout.row(align=True)
+                                        self.separator(row, 5, 2)
+                                        row.label(icon="DOT")
+                                        row.label(text=trans("Show Emitter"), icon="PARTICLES")
+                                        row.prop(value["show_emitter"], "show_instancer_for_viewport", icon="RESTRICT_VIEW_OFF" if obj.show_instancer_for_viewport else "RESTRICT_VIEW_ON", icon_only=True,emboss=False)
+                                        row.prop(value["show_emitter"], "show_instancer_for_render", icon="RESTRICT_RENDER_OFF" if obj.show_instancer_for_render else "RESTRICT_RENDER_ON", icon_only=True,emboss=False)
+                                    if "child_amount" in value:
+                                        row = layout.row(align=True)
+                                        self.separator(row, 5, 2)
+                                        row.label(icon="DOT")
+                                        row.label(text=trans("Child Amount"), icon="PARTICLES")
+                                        row.prop(value["child_amount"], "child_nbr")
+                                        row.prop(value["child_amount"], "rendered_child_count")
+                                    if "display_percentage" in value:
+                                        row = layout.row(align=True)
+                                        self.separator(row, 5, 2)
+                                        row.label(icon="DOT")
+                                        row.label(text=trans("Viewport Display Amount"), icon="PARTICLES")
+                                        row.prop(value["display_percentage"], "display_percentage")
+                                for gpfx, value in mods["gpfxs"].items():
+                                    row = layout.row(align=True)
+                                    self.separator(row, 4, 2)
+                                    row.label(icon="DOT")
+                                    row.label(text=gpfx.name, icon="MODIFIER", translate=False)
+                                    row.prop(gpfx, "show_viewport", icon_only=True,emboss=False)
+                                    row.prop(gpfx, "show_render", icon_only=True,emboss=False)
+                                for fx, value in mods["fxs"].items():
+                                    row = layout.row(align=True)
+                                    self.separator(row, 4, 2)
+                                    row.label(icon="DOT")
+                                    row.label(text=fx.name, icon="SHADERFX", translate=False)
+                                    row.prop(fx, "show_viewport", icon_only=True,emboss=False)
+                                    row.prop(fx, "show_render", icon_only=True,emboss=False)
+        except ReferenceError:
+            row = layout.row(align=True)
+            row.alignment = "CENTER"
+            row.alert=True
+            row.label(text=trans("Outdated Data: Please Check Again"))
+
+class FINALCHECK_PT_Menu_Prefs(FinalCheckPanel, bpy.types.Panel):
+    bl_parent_id = "FINALCHECK_PT_Menu"
     bl_label = bpy.app.translations.pgettext_iface("Preferences")
 
     def draw(self, context):
@@ -351,43 +309,42 @@ class ATTENREN_PT_Menu_Prefs(AttenRenPanel, bpy.types.Panel):
         layout = self.layout
         layout.label(text=trans("Check"))
         box = layout.box()
-        box.prop(wm, "attenRen_prefs_currentScene", text=trans(types.attenRen_prefs_currentScene.keywords["name"]))
+        box.prop(wm, "finalCheck_prefs_currentScene", text=trans(types.finalCheck_prefs_currentScene.keywords["name"]))
         row = box.row()
-        if not wm.attenRen_prefs_currentScene:
+        if not wm.finalCheck_prefs_currentScene:
             row.active = False
         row.separator()
-        row.prop(wm, "attenRen_prefs_currentViewLayer", text=trans(types.attenRen_prefs_currentViewLayer.keywords["name"]))
+        row.prop(wm, "finalCheck_prefs_currentViewLayer", text=trans(types.finalCheck_prefs_currentViewLayer.keywords["name"]))
 
         layout.label(text=trans("Check These Statues"))
         box = layout.box()
-        box.prop(wm, "attenRen_prefs_collVisibility", text=trans(types.attenRen_prefs_collVisibility.keywords["name"]))
-        box.prop(wm, "attenRen_prefs_objVisibility", text=trans(types.attenRen_prefs_objVisibility.keywords["name"]))
-        box.prop(wm, "attenRen_prefs_missingFiles", text=trans(types.attenRen_prefs_missingFiles.keywords["name"]))
-        box.prop(wm, "attenRen_prefs_renderRegion", text=trans(types.attenRen_prefs_renderRegion.keywords["name"]))
-        box.prop(wm, "attenRen_prefs_resolutionPercentage", text=trans(types.attenRen_prefs_resolutionPercentage.keywords["name"]))
-        box.prop(wm, "attenRen_prefs_samples", text=trans(types.attenRen_prefs_samples.keywords["name"]))
-        box.prop(wm, "attenRen_prefs_instance", text=trans(types.attenRen_prefs_instance.keywords["name"]))
-        box.prop(wm, "attenRen_prefs_modifiers", text=trans(types.attenRen_prefs_modifiers.keywords["name"]))
+        box.prop(wm, "finalCheck_prefs_collVisibility", text=trans(types.finalCheck_prefs_collVisibility.keywords["name"]))
+        box.prop(wm, "finalCheck_prefs_objVisibility", text=trans(types.finalCheck_prefs_objVisibility.keywords["name"]))
+        box.prop(wm, "finalCheck_prefs_missingFiles", text=trans(types.finalCheck_prefs_missingFiles.keywords["name"]))
+        box.prop(wm, "finalCheck_prefs_renderRegion", text=trans(types.finalCheck_prefs_renderRegion.keywords["name"]))
+        box.prop(wm, "finalCheck_prefs_resolutionPercentage", text=trans(types.finalCheck_prefs_resolutionPercentage.keywords["name"]))
+        box.prop(wm, "finalCheck_prefs_samples", text=trans(types.finalCheck_prefs_samples.keywords["name"]))
+        box.prop(wm, "finalCheck_prefs_instance", text=trans(types.finalCheck_prefs_instance.keywords["name"]))
+        box.prop(wm, "finalCheck_prefs_modifiers", text=trans(types.finalCheck_prefs_modifiers.keywords["name"]))
         row = box.row()
         row.alignment = "LEFT"
-        row.prop(wm, "attenRen_prefs_composite", text=trans(types.attenRen_prefs_composite.keywords["name"]))
+        row.prop(wm, "finalCheck_prefs_composite", text=trans(types.finalCheck_prefs_composite.keywords["name"]))
         row.label(text=trans("(α Ver.)"))
 
         box.label(text=trans("Particles"))
         row = box.row()
         row.separator(factor=1)
-        row.prop(wm, "attenRen_prefs_particleShowEmitter", text=trans(types.attenRen_prefs_particleShowEmitter.keywords["name"]))
+        row.prop(wm, "finalCheck_prefs_particleShowEmitter", text=trans(types.finalCheck_prefs_particleShowEmitter.keywords["name"]))
         row = box.row()
         row.separator(factor=1)
-        row.prop(wm, "attenRen_prefs_particleChildAmount", text=trans(types.attenRen_prefs_particleChildAmount.keywords["name"]))
+        row.prop(wm, "finalCheck_prefs_particleChildAmount", text=trans(types.finalCheck_prefs_particleChildAmount.keywords["name"]))
         row = box.row()
         row.separator(factor=1)
-        row.prop(wm, "attenRen_prefs_particleDisplayPercentage", text=trans(types.attenRen_prefs_particleDisplayPercentage.keywords["name"]))
+        row.prop(wm, "finalCheck_prefs_particleDisplayPercentage", text=trans(types.finalCheck_prefs_particleDisplayPercentage.keywords["name"]))
         box.label(text=trans("Grease Pencil"))
         row = box.row()
         row.separator(factor=1)
-        row.prop(wm, "attenRen_prefs_gpencilModifiers", text=trans(types.attenRen_prefs_gpencilModifiers.keywords["name"]))
+        row.prop(wm, "finalCheck_prefs_gpencilModifiers", text=trans(types.finalCheck_prefs_gpencilModifiers.keywords["name"]))
         row = box.row()
         row.separator(factor=1)
-        row.prop(wm, "attenRen_prefs_gpencilShaderEffects", text=trans(types.attenRen_prefs_gpencilShaderEffects.keywords["name"]))
-        layout.prop(wm, "attenRen_prefs_autoCheck", text=trans(types.attenRen_prefs_autoCheck.keywords["name"]))
+        row.prop(wm, "finalCheck_prefs_gpencilShaderEffects", text=trans(types.finalCheck_prefs_gpencilShaderEffects.keywords["name"]))

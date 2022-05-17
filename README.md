@@ -1,9 +1,12 @@
-# AttentiveRendering - Blender Addon
+# FinalCheck - Blender Addon
 日本語版は下にあります。/ Japanese version below.
 ## NO MORE Rendering Failures!
 This addon detects problems in your project and make your render successful.
 
 [Download From Here](https://example.com)
+
+![Screenshot on the addon](./README_fig1.png "Screenshot on the addon")  
+A list of problematic items appears.
 
 ## About
 Do you ever have to re-render your scene because of a small mistake?
@@ -26,14 +29,14 @@ You don't have to extract zip file.
 
 ## Usage
 1. Open Sidebar in 3D Viewport.
-2. In AttentiveRendering Panel, hit Check button.
-3. Check a result.
+2. In FinalCheck Panel, hit Check button.
+3. A list of problematic items appears.
 In Preferences sub-panel, you can toggle which items will be checked. These preferences are saved automatically.
 
 ### Checking Statuses  
-* **Collections Visibility**: Does visibility of collections in viewports and renders differ (check based on eye's icon, monitor's icon, and camera's icon)?
-* **Objects Visibility**: Does visibility of objects in viewports and renders differ (check based on eye's icon, monitor's icon, and camera's icon)?
-* **Missing Files**: Is an image path broken?
+* **Collections Visibility**: Does visibility of collections in viewports and renders differ? (Check based on eye, monitor, and, camera's icon.)
+* **Objects Visibility**: Does visibility of objects in viewports and renders differ? (Check based on eye, monitor, and, camera's icon.)
+* **Missing Files**: Is an image path broken? (Ignore packed file's path.)
 * **Render Region**: Is render region set and the area reduced?
 * **Resolution%**: Is resolution% under 100%?
 * **Samples**: Is render samples under preview samples?
@@ -41,7 +44,7 @@ In Preferences sub-panel, you can toggle which items will be checked. These pref
 * **Modifiers**: Does visibility of modifiers in viewports and renders differ?
 * **Composite** (alpha version): Do inputs of viewer node and composite node differ?  
 Composite checking is currently incomplete due to limitations of the Blender Python API.
-* **Particles: Show Emitter**: Does visibility of particles in viewports and renders differ?
+* **Particles: Show Emitter**: Does Visibility of particle emitter in viewports and renders differ?
 * **Particles: Child Amount**: Does child amount of particles in viewports and renders differ?
 * **Particles: Viewport Display Amount**: Is amount of particles in viewports under 100%?
 * **Grease Pencil: Modifiers**: Does visibility of modifiers in viewports and renders differ?
@@ -49,15 +52,25 @@ Composite checking is currently incomplete due to limitations of the Blender Pyt
 
 You can also choose where to check: all scenes or current scene/view_layer only.
 
+## FAQ
+**Q**: **Render result is not what I intended**  
+**A**: This addon does not detect all problems. Check is based on current frame and does not consider status of other frames.  
+
+**Q**: **Check takes a long time**  
+**A**: Complex file may take longer to check. Try to decrease check items from preference. Checking image paths on network locations may also take time.  
+
 ### Feedback
-If you find bugs or have an opinion, let me know in issues or my [Twitter](https://twitter.com/mineBeReal).
-Thanks for using AttentiveRendering.
+If you find bugs or have an improvement, let me know in issues or my [Twitter](https://twitter.com/mineBeReal).
+Thanks for using FinalCheck.
 
 ---
 ## レンダリングの失敗をなくそう！
 このアドオンは、Blenderファイルの問題を検出し、レンダリングを一発で成功させます。
 
 [ダウンロードはここから](https://example.com)
+
+![アドオンのスクリーンショット](./README_fig1.png "アドオンのスクリーンショット")  
+問題がある思われる項目が一覧で表示されます。
 
 ## はじめに
 ほんの小さなミスで時間のかかるレンダリングをやり直すこと、ありますよね。  
@@ -80,14 +93,14 @@ zipファイルを展開する必要はありません。
 
 ## 使い方
 1. 3D ビューポートでサイドパネルを開きます。
-2. AttentiveRenderingパネルからチェックボタンを押します。
-3. 結果を確認します。
+2. FinalCheckパネルからチェックボタンを押します。
+3. 問題がある思われる項目が一覧で表示されます。
 プリファレンスサブパネルから、チェックする項目を設定できます。これらは自動で保存されます。
 
 ### チェックする項目 
-* **コレクションの可視性**: ビューポートとレンダーでコレクションの可視性が異なるか(目のアイコン、モニターのアイコン、カメラのアイコンから判別します)。
-* **オブジェクトの可視性**: ビューポートとレンダーでオブジェクトの可視性が異なるか(目のアイコン、モニターのアイコン、カメラのアイコンから判別します)。
-* **パスが不明なファイル**: 画像ファイルのパスが壊れているか。
+* **コレクションの可視性**: ビューポートとレンダーでコレクションの可視性が異なるか。(目のアイコン、モニターのアイコン、カメラのアイコンから判別します。)
+* **オブジェクトの可視性**: ビューポートとレンダーでオブジェクトの可視性が異なるか。(目のアイコン、モニターのアイコン、カメラのアイコンから判別します。)
+* **パスが不明なファイル**: 画像ファイルのパスが壊れているか。(パックされたファイルのパスはチェックしません。)
 * **レンダー領域**: レンダー領域が設定されていて、レンダー領域が縮小しているか。
 * **解像度%**: 解像度%が100%より小さいか。
 * **サンプル数**: レンダーのサンプル数がビューポートのサンプル数より小さいか。
@@ -102,6 +115,13 @@ zipファイルを展開する必要はありません。
 * **グリースペンシル: エフェクト**: ビューポートとレンダーでエフェクトの可視性が異なるか。
 
 プリファレンスから、全てのシーンをチェックするか、現在のシーン/ビューレイヤーのみをチェックするかも選択できます。
+
+### FAQ
+**Q**: **チェックしたにもかかわらず、意図しないレンダリングになる**  
+**A**: 本アドオンは全てのミスを発見するものではありません。また、チェックは現在のフレームを元に行われ、他のフレームの状態をチェックしません。
+
+**Q**: **チェックに時間がかかる**  
+**A**: 複雑なファイルだとチェックに時間がかかることがあります。プリファレンスからチェック項目を減らしてみてください。また、パスが不明なファイルをチェックする際にネットワーク上のパスがあると、時間がかかることがあります。  
 
 ### フィードバック
 バグやご意見は、issuesや[ツイッター](https://twitter.com/mineBeReal)からお願いします。
