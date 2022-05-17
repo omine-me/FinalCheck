@@ -3,7 +3,7 @@
 ## NO MORE Rendering Failures!
 This addon detects problems in your project and make your render successful.
 
-[Download From Here](https://example.com)
+[Download From Here](https://github.com/omine-me/FinalCheck/releases/tag/FinalCheck_v0.1)
 
 ![Screenshot on the addon](./README_fig1.png "Screenshot on the addon")  
 A list of problematic items appears.
@@ -22,7 +22,7 @@ Check with a single button and make it more efficient.
 
 ## Installation
 #### Download
-Download a .zip file from [here](https://example.com).
+Download a .zip file from [here](https://github.com/omine-me/FinalCheck/releases/tag/FinalCheck_v0.1).
 #### Installation
 Install the addon from Edit -> Preferences... -> Add-ons -> Install...  
 You don't have to extract zip file.
@@ -70,7 +70,7 @@ Distributed under the MIT License.
 ## レンダリングの失敗をなくそう！
 このアドオンは、Blenderファイルの問題を検出し、レンダリングを一発で成功させます。
 
-[ダウンロードはここから](https://example.com)
+[ダウンロードはここから](https://github.com/omine-me/FinalCheck/releases/tag/FinalCheck_v0.1)
 
 ![アドオンのスクリーンショット](./README_fig1.png "アドオンのスクリーンショット")  
 問題がある思われる項目が一覧で表示されます。
@@ -89,7 +89,7 @@ Distributed under the MIT License.
 
 ## インストール
 #### ダウンロード
-[ここ](https://example.com)からzipファイルをダウンロードします。
+[ここ](https://github.com/omine-me/FinalCheck/releases/tag/FinalCheck_v0.1)からzipファイルをダウンロードします。
 #### インストール
 編集 -> プリファレンス... -> アドオン -> インストール... からインストールします。
 zipファイルを展開する必要はありません。
