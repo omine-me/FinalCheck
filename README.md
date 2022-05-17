@@ -59,9 +59,12 @@ You can also choose where to check: all scenes or current scene/view_layer only.
 **Q**: **Check takes a long time**  
 **A**: Complex file may take longer to check. Try to decrease check items from preference. Checking image paths on network locations may also take time.  
 
-### Feedback
+## Feedback
 If you find bugs or have an improvement, let me know in issues or my [Twitter](https://twitter.com/mineBeReal).
 Thanks for using FinalCheck.
+
+## License
+Distributed under the MIT License.
 
 ---
 ## レンダリングの失敗をなくそう！
@@ -116,13 +119,16 @@ zipファイルを展開する必要はありません。
 
 プリファレンスから、全てのシーンをチェックするか、現在のシーン/ビューレイヤーのみをチェックするかも選択できます。
 
-### FAQ
+## FAQ
 **Q**: **チェックしたにもかかわらず、意図しないレンダリングになる**  
 **A**: 本アドオンは全てのミスを発見するものではありません。また、チェックは現在のフレームを元に行われ、他のフレームの状態をチェックしません。
 
 **Q**: **チェックに時間がかかる**  
 **A**: 複雑なファイルだとチェックに時間がかかることがあります。プリファレンスからチェック項目を減らしてみてください。また、パスが不明なファイルをチェックする際にネットワーク上のパスがあると、時間がかかることがあります。  
 
-### フィードバック
+## フィードバック
 バグやご意見は、issuesや[ツイッター](https://twitter.com/mineBeReal)からお願いします。
 改善案も歓迎です。
+
+## ライセンス
+MITライセンスの下で利用可能です。
