@@ -11,7 +11,7 @@ A list of problematic items appears.
 ## About
 Do you ever have to re-render your scene because of a small mistake?
 This addon detects various problems of your project and suggest corrections.
-Check with a single button and make it more efficient.
+Check with a single button and fix problems at once.
 
 ### Environment
 #### Compatible Blender Versions
