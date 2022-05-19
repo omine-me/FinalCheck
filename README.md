@@ -3,8 +3,7 @@
 ## NO MORE Rendering Failures!
 This addon detects problems in your project and make your render successful.
 
-Download it for free from [Gumroad](https://omineme.gumroad.com/l/finalcheck) or [GitHub](https://github.com/omine-me/FinalCheck/releases)  
-(Social tipping is available in Gumroad.)  
+Download it for free from [Gumroad](https://omineme.gumroad.com/l/finalcheck) or [GitHub](https://github.com/omine-me/FinalCheck/releases). (Social tipping is available in Gumroad.)  
 
 ![Screenshot on the addon](./README_fig1.png "Screenshot on the addon")  
 A list of problematic items appears.
@@ -71,8 +70,7 @@ Distributed under the MIT License.
 ## レンダリングの失敗をなくそう！
 このアドオンは、Blenderファイルの問題を検出し、レンダリングを一発で成功させます。
 
-[Gumroad](https://omineme.gumroad.com/l/finalcheck) もしくは [GitHub](https://github.com/omine-me/FinalCheck/releases)から無料でダウンロード  
-(Gumroadでは投げ銭を受け付けています。)
+[Gumroad](https://omineme.gumroad.com/l/finalcheck) もしくは [GitHub](https://github.com/omine-me/FinalCheck/releases)から無料でダウンロードできます。(Gumroadでは投げ銭を受け付けています。)  
 
 ![アドオンのスクリーンショット](./README_fig1.png "アドオンのスクリーンショット")  
 問題がある思われる項目が一覧で表示されます。
