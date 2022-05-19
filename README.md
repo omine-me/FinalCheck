@@ -33,7 +33,7 @@ You don't have to extract zip file.
 3. A list of problematic items appears.
 In Preferences sub-panel, you can toggle which items will be checked. These preferences are saved automatically.
 
-### Checking Statuses  
+### Check Items  
 * **Collections Visibility**: Does visibility of collections in viewports and renders differ? (Check based on eye, monitor, and, camera's icon.)
 * **Objects Visibility**: Does visibility of objects in viewports and renders differ? (Check based on eye, monitor, and, camera's icon.)
 * **Missing Files**: Is an image path broken? (Ignore packed file's path.)
