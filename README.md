@@ -3,7 +3,8 @@
 ## NO MORE Rendering Failures!
 This addon detects problems in your project and make your render successful.
 
-[Download From Here](https://github.com/omine-me/FinalCheck/releases)
+Download it for free from [Gumroad](https://omineme.gumroad.com/l/finalcheck) or [GitHub](https://github.com/omine-me/FinalCheck/releases)  
+(Social tipping is available in Gumroad.)  
 
 ![Screenshot on the addon](./README_fig1.png "Screenshot on the addon")  
 A list of problematic items appears.
@@ -22,7 +23,7 @@ Check with a single button and fix problems at once.
 
 ## Installation
 #### Download
-Download a .zip file from [here](https://github.com/omine-me/FinalCheck/releases).
+Download a .zip file from [Gumroad](https://omineme.gumroad.com/l/finalcheck) or [GitHub](https://github.com/omine-me/FinalCheck/releases)
 #### Installation
 Install the addon from Edit -> Preferences... -> Add-ons -> Install...  
 You don't have to extract zip file.
@@ -70,7 +71,8 @@ Distributed under the MIT License.
 ## レンダリングの失敗をなくそう！
 このアドオンは、Blenderファイルの問題を検出し、レンダリングを一発で成功させます。
 
-[ダウンロードはここから](https://github.com/omine-me/FinalCheck/releases)
+[Gumroad](https://omineme.gumroad.com/l/finalcheck) もしくは [GitHub](https://github.com/omine-me/FinalCheck/releases)から無料でダウンロード  
+(Gumroadでは投げ銭を受け付けています。)
 
 ![アドオンのスクリーンショット](./README_fig1.png "アドオンのスクリーンショット")  
 問題がある思われる項目が一覧で表示されます。
@@ -89,7 +91,7 @@ Distributed under the MIT License.
 
 ## インストール
 #### ダウンロード
-[ここ](https://github.com/omine-me/FinalCheck/releases)からzipファイルをダウンロードします。
+[Gumroad](https://omineme.gumroad.com/l/finalcheck) もしくは [GitHub](https://github.com/omine-me/FinalCheck/releases)からzipファイルをダウンロードします。
 #### インストール
 編集 -> プリファレンス... -> アドオン -> インストール... からインストールします。
 zipファイルを展開する必要はありません。
