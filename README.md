@@ -45,11 +45,13 @@ In Preferences sub-panel, you can toggle which items will be checked. These pref
 * **Modifiers**: Does visibility of modifiers in viewports and renders differ?
 * **Composite** (alpha version): Do inputs of viewer node and composite node differ?  
 Composite checking is currently incomplete due to limitations of the Blender Python API.
-* **Particles: Show Emitter**: Does Visibility of particle emitter in viewports and renders differ?
-* **Particles: Child Amount**: Does child amount of particles in viewports and renders differ?
-* **Particles: Viewport Display Amount**: Is amount of particles in viewports under 100%?
-* **Grease Pencil: Modifiers**: Does visibility of modifiers in viewports and renders differ?
-* **Grease Pencil: Effects**: Does visibility of effects in viewports and renders differ?  
+* **Particles**:
+  * **Show Emitter**: Does Visibility of particle emitter in viewports and renders differ?
+  * **Child Amount**: Does child amount of particles in viewports and renders differ?
+  * **Viewport Display Amount**: Is amount of particles in viewports under 100%?
+* **Grease Pencil**:
+  * **Modifiers**: Does visibility of modifiers in viewports and renders differ?
+  * **Effects**: Does visibility of effects in viewports and renders differ?  
 
 You can also choose where to check: all scenes or current scene/view_layer only.
 
@@ -113,11 +115,13 @@ zipファイルを展開する必要はありません。
 * **モディファイア**: ビューポートとレンダーでモディファイアの可視性が異なるか。
 * **コンポジット** (アルファ版): ビューアーノードとコンポジットノードのインプットが異なるか。  
 コンポジットのチェックは、Blender Python APIの制約により現状不完全です。
-* **パーティクル: エミッターを表示**: ビューポートとレンダーでエミッターの可視性が異なるか。
-* **パーティクル: 子パーティクルの量**: ビューポートとレンダーで子パーティクルの量が異なるか。
-* **パーティクル: パーティクルの表示率**: ビューポートでのパーティクルの表示率が100%より小さいか。
-* **グリースペンシル: モディファイア**: ビューポートとレンダーでモディファイアの可視性が異なるか。
-* **グリースペンシル: エフェクト**: ビューポートとレンダーでエフェクトの可視性が異なるか。
+* **パーティクル**:
+  * **エミッターを表示**: ビューポートとレンダーでエミッターの可視性が異なるか。
+  * **子パーティクルの量**: ビューポートとレンダーで子パーティクルの量が異なるか。
+  * **パーティクルの表示率**: ビューポートでのパーティクルの表示率が100%より小さいか。
+* **グリースペンシル**:
+  * **モディファイア**: ビューポートとレンダーでモディファイアの可視性が異なるか。
+  * **エフェクト**: ビューポートとレンダーでエフェクトの可視性が異なるか。
 
 プリファレンスから、全てのシーンをチェックするか、現在のシーン/ビューレイヤーのみをチェックするかも選択できます。
 
