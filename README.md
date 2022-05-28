@@ -23,7 +23,7 @@ Check with a single button and fix problems at once.
 
 ## Installation
 #### Download
-Download a .zip file from [Gumroad](https://omineme.gumroad.com/l/finalcheck) or [GitHub](https://github.com/omine-me/FinalCheck/releases)
+Download a .zip file from [Gumroad](https://omineme.gumroad.com/l/finalcheck), [GitHub](https://github.com/omine-me/FinalCheck/releases) or [Blender Market](https://blendermarket.com/products/finalcheck).
 #### Installation
 Install the addon from Edit -> Preferences... -> Add-ons -> Install...  
 You don't have to extract zip file.
@@ -93,7 +93,7 @@ Distributed under the MIT License.
 
 ## インストール
 #### ダウンロード
-[Gumroad](https://omineme.gumroad.com/l/finalcheck) もしくは [GitHub](https://github.com/omine-me/FinalCheck/releases)からzipファイルをダウンロードします。
+[Gumroad](https://omineme.gumroad.com/l/finalcheck)、[GitHub](https://github.com/omine-me/FinalCheck/releases)、[Blender Market](https://blendermarket.com/products/finalcheck)のいずれかからzipファイルをダウンロードします。
 #### インストール
 編集 -> プリファレンス... -> アドオン -> インストール... からインストールします。
 zipファイルを展開する必要はありません。
