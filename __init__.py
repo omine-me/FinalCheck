@@ -241,6 +241,7 @@ classes = [
     main.FINALCHECK_OT_SetObjHide,
     main.FINALCHECK_OT_ClearRenderRegion,
     main.FINALCHECK_OT_ToggleVisibilityInPanel,
+    main.FINALCHECK_OT_SelectObject,
     main.FINALCHECK_PT_Menu,
     main.FINALCHECK_PT_Menu_Prefs,
 ]

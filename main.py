@@ -85,6 +85,33 @@ class FINALCHECK_OT_ClearRenderRegion(bpy.types.Operator):
         self.report({'INFO'}, bpy.app.translations.pgettext_iface("Render Region Cleared"))
         return {'FINISHED'}
 
+class FINALCHECK_OT_SelectObject(bpy.types.Operator):
+    bl_idname = "finalcheck.select_object"
+    bl_label = "Select Object"
+    bl_description = bpy.app.translations.pgettext_tip("Select Object")
+    bl_options = {'REGISTER', 'UNDO'}
+
+    objName: StringProperty(
+        name="objName",
+        options={"HIDDEN"},
+    )
+    scene: StringProperty(
+        name="scene",
+        options={"HIDDEN"},
+    )
+    def ShowMessageBox(self):
+        def draw(self, context):
+            self.layout.label(text=bpy.app.translations.pgettext_iface("Cannot Select Objects of Ohter Scene"))
+        bpy.context.window_manager.popup_menu(draw, title = bpy.app.translations.pgettext_iface("Toggle Scene to {}").format(self.scene), icon = "ERROR")
+    def execute(self, context):
+        if context.scene.name != self.scene:
+            self.ShowMessageBox()
+            return {'FINISHED'}
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.context.view_layer.objects.active = bpy.data.objects[self.objName]
+        bpy.data.objects[self.objName].select_set(True)
+        return {'FINISHED'}
+
 class FinalCheckPanel:
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -216,6 +243,7 @@ class FINALCHECK_PT_Menu(FinalCheckPanel, bpy.types.Panel):
                         row.separator(factor=2)
                         row.operator(FINALCHECK_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if colls["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(colls))
                         row.label(text=vl.name, icon="RENDERLAYERS", translate=False)
+                        # row.operator(FINALCHECK_OT_SelectObject.bl_idname, text=vl.name, icon="RENDERLAYERS", translate=False).objName = vl.name
                         if colls["hide"]:
                             continue
                         for coll, objs in colls["colls"].items():
@@ -232,10 +260,18 @@ class FINALCHECK_PT_Menu(FinalCheckPanel, bpy.types.Panel):
                             if objs["hide"]:
                                 continue
                             for obj, mods in objs["objs"].items():
-                                row = layout.row(align=True)
+                                # row = layout.row(align=True)
+                                sp = layout.split(align=True,factor=.75)
+                                row = sp.row(align=True)
+                                row.alignment = "LEFT"
                                 self.separator(row, 3, 2)
                                 row.operator(FINALCHECK_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if mods["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(mods))
-                                row.label(text=obj.name, icon=self.getObjType(obj), translate=False)
+                                # row.label(text=obj.name, icon=self.getObjType(obj), translate=False)
+                                objName = row.operator(FINALCHECK_OT_SelectObject.bl_idname, text=obj.name, icon=self.getObjType(obj), translate=False, emboss=False)
+                                objName.objName = obj.name
+                                objName.scene = scene.name
+                                row = sp.row(align=True)
+                                row.alignment = "RIGHT"
                                 objHide = row.operator(FINALCHECK_OT_SetObjHide.bl_idname, text="", icon="HIDE_ON" if obj.hide_get(view_layer=vl) else "HIDE_OFF",emboss=False)
                                 objHide.obj = obj.name
                                 objHide.scene = scene.name
