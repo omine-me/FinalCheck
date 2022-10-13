@@ -99,6 +99,8 @@ class FINALCHECK_PT_Menu(FinalCheckPanel, bpy.types.Panel):
             return "OUTLINER_OB_MESH"
         elif type == "CURVE":
             return "OUTLINER_OB_CURVE"
+        elif type == "CURVES": # Blender 3.3 and above
+            return "OUTLINER_OB_CURVES"
         elif type == "SURFACE":
             return "OUTLINER_OB_SURFACE"
         elif type == "META":
