@@ -119,6 +119,26 @@ class FinalCheck:
                     collsDict[child] = collDict
                 if len(child.children) != 0:
                     self.getObjRecursively(collsDict, child.children, vl)
+    
+    def get_attr_from_string(parent, attr_sequence):
+        if attr_sequence is None:
+            return parent
+        next_attr = re.search(r'\[|\.', attr_sequence)
+        if not next_attr:
+            return getattr(parent, attr_sequence)
+        split_index = next_attr.start()
+        next_parent = attr_sequence[:split_index]
+        next_child =  attr_sequence[split_index+1:]
+        if next_parent[-1] == "]":
+            next_parent = next_parent[:-1] ## delete ]
+            if next_parent[0] == '"':
+                next_parent = next_parent[1:-1]
+            else:
+                next_parent = int(next_parent)
+            result = recursive(parent[next_parent], next_child)
+        else:
+            result = recursive(getattr(parent, next_parent), next_child)
+        return result
 
     def check(self):
         self.notCheckedYet = False
