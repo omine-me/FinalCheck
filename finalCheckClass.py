@@ -1,4 +1,4 @@
-import bpy, os, json
+import bpy, os, json, re
 
 class FinalCheck:
     def __init__(self):
@@ -43,7 +43,7 @@ class FinalCheck:
         renderSettings.border_min_y = 0.
         renderSettings.use_border = False
 
-    def objectCheck(self, vl, objsDict, obj):
+    def objectCheck(self, scene, vl, objsDict, obj):
         wm = bpy.context.window_manager
         addToObjsDict = False
         objDict = {"hide": False}
@@ -96,11 +96,29 @@ class FinalCheck:
             addToObjsDict = True
             objDict["instance"] = {}
         
+        keyframeDict = {}
+        if (scene.name == bpy.context.scene.name) and obj.animation_data and len(obj.animation_data.action.fcurves):
+            for keyframe in obj.animation_data.action.fcurves:
+                result, lastParent, lastAttribute = self.getAttrFromString(obj, keyframe.data_path)
+                if obj.bl_rna.properties[lastAttribute].type == 'ENUM':
+                    result = obj.bl_rna.properties[lastAttribute].enum_items[result].value
+                    ### 
+                elif obj.bl_rna.properties[lastAttribute].is_array:
+                    result = result[keyframe.array_index]
+                assert  isinstance(result, (bool, float, int))
+
+                if result != keyframe.evaluate(bpy.context.scene.frame_current):
+                    addToObjsDict = True
+                    keyframeDict[repr(lastParent)+lastAttribute] = {"parent": lastParent, "attr": lastAttribute}
+        objDict["keyframes"] = {"hide": False, "keyframe": keyframeDict}
+        
+        print(objDict["keyframes"])
+        
         if addToObjsDict:
             objsDict[obj] = objDict
 
 
-    def getObjRecursively(self, collsDict, children, vl):
+    def getObjRecursively(self, scene, collsDict, children, vl):
         for child in children:
             collDict = {"hide":False}
             objsDict = {}
@@ -108,7 +126,7 @@ class FinalCheck:
 
             if not child.exclude:
                 for obj in child.collection.objects:
-                    self.objectCheck(vl, objsDict, obj)
+                    self.objectCheck(scene, vl, objsDict, obj)
                 if bpy.context.window_manager.finalCheck_prefs_collVisibility:
                     if (((child.hide_viewport != child.collection.hide_viewport) and child.collection.hide_render == False) or 
                         ((child.hide_viewport == child.collection.hide_viewport == False) and child.collection.hide_render == True) or
@@ -118,14 +136,14 @@ class FinalCheck:
                     collDict["objs"] = objsDict
                     collsDict[child] = collDict
                 if len(child.children) != 0:
-                    self.getObjRecursively(collsDict, child.children, vl)
+                    self.getObjRecursively(scene, collsDict, child.children, vl)
     
-    def get_attr_from_string(parent, attr_sequence):
+    def getAttrFromString(self, parent, attr_sequence):
         if attr_sequence is None:
-            return parent
-        next_attr = re.search(r'\[|\.', attr_sequence)
+            return parent, parent, None
+        next_attr = re.search('\[|\.', attr_sequence)
         if not next_attr:
-            return getattr(parent, attr_sequence)
+            return getattr(parent, attr_sequence), parent, attr_sequence
         split_index = next_attr.start()
         next_parent = attr_sequence[:split_index]
         next_child =  attr_sequence[split_index+1:]
@@ -135,10 +153,9 @@ class FinalCheck:
                 next_parent = next_parent[1:-1]
             else:
                 next_parent = int(next_parent)
-            result = recursive(parent[next_parent], next_child)
+            return self.getAttrFromString(parent[next_parent], next_child)
         else:
-            result = recursive(getattr(parent, next_parent), next_child)
-        return result
+            return self.getAttrFromString(getattr(parent, next_parent), next_child)
 
     def check(self):
         self.notCheckedYet = False
@@ -211,13 +228,13 @@ class FinalCheck:
                 collDict = {"hide":False}
                 objsDict = {}
                 for obj in vl.layer_collection.collection.objects:
-                    self.objectCheck(vl, objsDict, obj)
+                    self.objectCheck(scene, vl, objsDict, obj)
                 if objsDict:
                     collDict["objs"] = objsDict
                     collsDict[vl.layer_collection.collection] = collDict
                 ### End of Master Coll Process
                 # Other collections, check recursively
-                self.getObjRecursively(collsDict, vl.layer_collection.children, vl)
+                self.getObjRecursively(scene, collsDict, vl.layer_collection.children, vl)
                 
                 if collsDict:
                     vlDict["colls"] = collsDict   
