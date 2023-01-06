@@ -121,6 +121,8 @@ class FinalCheck:
                     self.getObjRecursively(collsDict, child.children, vl)
 
     def check(self):
+        self.missingFiles.clear()
+        self.checkedItems.clear()
         self.notCheckedYet = False
         wm = bpy.context.window_manager
         if wm.finalCheck_prefs_missingFiles:
@@ -213,6 +215,7 @@ class FinalCheck:
         types = bpy.types.WindowManager
         wm = bpy.context.window_manager
         prefs = {
+            types.finalCheck_prefs_autoCheck.keywords["attr"]: wm.finalCheck_prefs_autoCheck,
             types.finalCheck_prefs_currentScene.keywords["attr"]: wm.finalCheck_prefs_currentScene,
             types.finalCheck_prefs_currentViewLayer.keywords["attr"]: wm.finalCheck_prefs_currentViewLayer,
             types.finalCheck_prefs_collVisibility.keywords["attr"]: wm.finalCheck_prefs_collVisibility,
