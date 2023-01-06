@@ -1,31 +1,40 @@
+from importlib.util import LazyLoader
 import bpy
 from _ctypes import PyObj_FromPtr
 from bpy.props import (
     StringProperty,
+    BoolProperty,
 )
+from bpy.app.translations import (
+    pgettext_iface as iface_,
+    pgettext_tip as tip_,
+)
+
+COLLECTION_ICON_NAME = 'OUTLINER_COLLECTION' if 'OUTLINER_COLLECTION' \
+                        in bpy.types.UILayout.bl_rna.functions[
+                            'prop'].parameters['icon'].enum_items.keys() \
+                        else 'GROUP'
 
 class FINALCHECK_OT_Check(bpy.types.Operator):
     bl_idname = "finalcheck.check"
     bl_label = "Check"
-    bl_description = bpy.app.translations.pgettext_tip("Detect Problems")
+    bl_description = tip_("Detect problems")
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         finalCheck = context.window_manager.finalCheck
-        finalCheck.checkedItems.clear()
-        finalCheck.missingFiles.clear()
         finalCheck.check()
 
         if finalCheck.missingFiles or finalCheck.checkedItems:
-            self.report({'WARNING'}, bpy.app.translations.pgettext_iface("Problems Detected"))
+            self.report({'WARNING'}, iface_("Problems Detected"))
         else:
-            self.report({'INFO'}, bpy.app.translations.pgettext_iface("No Problems Detected"))
+            self.report({'INFO'}, iface_("No Problems Detected"))
         return {'FINISHED'}
 
 class FINALCHECK_OT_SetObjHide(bpy.types.Operator):
     bl_idname = "finalcheck.set_obj_hide"
     bl_label = "Toggle Object"
-    bl_description = bpy.app.translations.pgettext_tip("Toggle Visibility")
+    bl_description = tip_("Toggle Visibility")
     bl_options = {'REGISTER', 'UNDO'}
 
     obj: StringProperty(
@@ -43,8 +52,8 @@ class FINALCHECK_OT_SetObjHide(bpy.types.Operator):
     ### This def might be in top level for reuse, but causes crash...
     def ShowMessageBox(self):
         def draw(self, context):
-            self.layout.label(text=bpy.app.translations.pgettext_iface("This Item cannot be Changed from Other Scenes"))
-        bpy.context.window_manager.popup_menu(draw, title = bpy.app.translations.pgettext_iface("Toggle Scene to {}").format(self.scene), icon = "HIDE_OFF")
+            self.layout.label(text=iface_("This Item cannot be Changed from Other Scenes"))
+        bpy.context.window_manager.popup_menu(draw, title = iface_("Toggle Scene to {}").format(self.scene), icon = "HIDE_OFF")
     def execute(self, context):
         if context.scene.name != self.scene:
             self.ShowMessageBox()
@@ -57,7 +66,7 @@ class FINALCHECK_OT_SetObjHide(bpy.types.Operator):
 class FINALCHECK_OT_ToggleVisibilityInPanel(bpy.types.Operator):
     bl_idname = "finalcheck.toggle_visibility_in_panel"
     bl_label = "Toggle Visibility"
-    bl_description = bpy.app.translations.pgettext_tip("Toggle Visibility")
+    bl_description = tip_("Toggle Visibility")
     bl_options = {'REGISTER', 'UNDO'}
 
     objId: StringProperty(
@@ -72,7 +81,7 @@ class FINALCHECK_OT_ToggleVisibilityInPanel(bpy.types.Operator):
 class FINALCHECK_OT_ClearRenderRegion(bpy.types.Operator):
     bl_idname = "finalcheck.clear_render_region"
     bl_label = "Clear Render Region"
-    bl_description = bpy.app.translations.pgettext_tip("Clear Render Region")
+    bl_description = tip_("Clear Render Region")
     bl_options = {'REGISTER', 'UNDO'}
 
     objId: StringProperty(
@@ -82,13 +91,13 @@ class FINALCHECK_OT_ClearRenderRegion(bpy.types.Operator):
     def execute(self, context):
         renderSettings = PyObj_FromPtr(int(self.objId))
         context.window_manager.finalCheck.clearRenderRegion(renderSettings)
-        self.report({'INFO'}, bpy.app.translations.pgettext_iface("Render Region Cleared"))
+        self.report({'INFO'}, iface_("Render Region Cleared"))
         return {'FINISHED'}
 
 class FINALCHECK_OT_SelectObject(bpy.types.Operator):
     bl_idname = "finalcheck.select_object"
     bl_label = "Select Object"
-    bl_description = bpy.app.translations.pgettext_tip("Select Object")
+    bl_description = tip_("Select Object")
     bl_options = {'REGISTER', 'UNDO'}
 
     objName: StringProperty(
@@ -101,8 +110,8 @@ class FINALCHECK_OT_SelectObject(bpy.types.Operator):
     )
     def ShowMessageBox(self):
         def draw(self, context):
-            self.layout.label(text=bpy.app.translations.pgettext_iface("Cannot Select Objects of Ohter Scene"))
-        bpy.context.window_manager.popup_menu(draw, title = bpy.app.translations.pgettext_iface("Toggle Scene to {}").format(self.scene), icon = "ERROR")
+            self.layout.label(text=iface_("Cannot Select Objects of Ohter Scene"))
+        bpy.context.window_manager.popup_menu(draw, title = iface_("Toggle Scene to {}").format(self.scene), icon = "ERROR")
     def execute(self, context):
         if context.scene.name != self.scene:
             self.ShowMessageBox()
@@ -110,6 +119,51 @@ class FINALCHECK_OT_SelectObject(bpy.types.Operator):
         bpy.ops.object.select_all(action='DESELECT')
         bpy.context.view_layer.objects.active = bpy.data.objects[self.objName]
         bpy.data.objects[self.objName].select_set(True)
+        return {'FINISHED'}
+
+class FINALCHECK_OT_Render(bpy.types.Operator):
+    bl_idname = "finalcheck.render"
+    bl_label = "Check and Render"
+    bl_description = tip_("Check problems and render if no problems exist")
+    bl_options = {'REGISTER', 'UNDO'}
+
+    animation: BoolProperty(
+        name="animation",
+        options={"HIDDEN"},
+        default=False,
+    )
+    write_still: BoolProperty(
+        name="write_still",
+        options={"HIDDEN"},
+        default=False,
+    )
+    use_viewport: BoolProperty(
+        name="use_viewport",
+        options={"HIDDEN"},
+        default=False,
+    )
+    layer: StringProperty(
+        name="layer",
+        options={"HIDDEN"},
+    )
+    scene: StringProperty(
+        name="scene",
+        options={"HIDDEN"},
+    )
+    def execute(self, context):
+        finalCheck = context.window_manager.finalCheck
+        finalCheck.check()
+
+        if finalCheck.missingFiles or finalCheck.checkedItems:
+            self.report({'WARNING'}, iface_("Problems Detected"))
+        else:
+            bpy.ops.render.render({}, 'INVOKE_DEFAULT', True, 
+                                    animation=self.animation,
+                                    write_still=self.write_still,
+                                    use_viewport=self.use_viewport,
+                                    layer=self.layer,
+                                    scene=self.scene)
+            self.report({'INFO'}, iface_("No Problems Detected"))
         return {'FINISHED'}
 
 class FinalCheckPanel:
@@ -172,9 +226,8 @@ class FINALCHECK_PT_Menu(FinalCheckPanel, bpy.types.Panel):
             layout.separator(factor=fac)
 
     def draw(self, context):
-        trans = bpy.app.translations.pgettext_iface
         layout = self.layout
-        layout.operator(FINALCHECK_OT_Check.bl_idname, text=trans("Check"))
+        layout.operator(FINALCHECK_OT_Check.bl_idname, text=iface_("Check"))
         row = layout.row(align=True)
         layout.separator()
         finalCheck = context.window_manager.finalCheck
@@ -183,12 +236,12 @@ class FINALCHECK_PT_Menu(FinalCheckPanel, bpy.types.Panel):
             if not missingFiles and not finalCheck.checkedItems and not finalCheck.notCheckedYet:
                 row = layout.row(align=True)
                 row.alignment = "CENTER"
-                row.label(text=trans("No Problems Detected"))
+                row.label(text=iface_("No Problems Detected"))
                 return
             if missingFiles and "files" in missingFiles:
                 row = layout.row(align=True)
                 row.operator(FINALCHECK_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if missingFiles["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(missingFiles))
-                row.label(text=trans("Missing Files"))
+                row.label(text=iface_("Missing Files"))
                 if not missingFiles["hide"]:
                     for image in missingFiles["files"]:
                         row = layout.row(align=True)
@@ -204,38 +257,38 @@ class FINALCHECK_PT_Menu(FinalCheckPanel, bpy.types.Panel):
                 if "border" in vls.keys():
                     row = layout.row(align=True)
                     row.separator(factor=2)
-                    row.label(text=trans("Render Region is Set"), icon="ERROR")
-                    row.operator(FINALCHECK_OT_ClearRenderRegion.bl_idname, text=trans("Clear")).objId = str(id(vls["border"]))
+                    row.label(text=iface_("Render Region is Set"), icon="ERROR")
+                    row.operator(FINALCHECK_OT_ClearRenderRegion.bl_idname, text=iface_("Clear")).objId = str(id(vls["border"]))
                 if "resolution_percentage" in vls.keys():
                     row = layout.row(align=True)
                     row.separator(factor=2)
-                    row.label(text=trans("Resolution % is under 100%"), icon="ERROR")
+                    row.label(text=iface_("Resolution % is under 100%"), icon="ERROR")
                     row.prop(scene.render, "resolution_percentage")
                 if "cycles_sample" in vls.keys():
                     row = layout.row(align=True)
                     row.separator(factor=2)
                     sp = row.split(align=True,factor=.5)
-                    sp.label(text=trans("Render Samples are Less than Preview Samples"), icon="ERROR")
+                    sp.label(text=iface_("Render Samples are Less than Preview Samples"), icon="ERROR")
                     sp.prop(scene.cycles, "preview_samples")
                     sp.prop(scene.cycles, "samples")
                 elif "eevee_sample" in vls.keys():
                     row = layout.row(align=True)
                     row.separator(factor=2)
                     sp = row.split(align=True,factor=.5)
-                    sp.label(text=trans("Render Samples are Less than Preview Samples"), icon="ERROR")
+                    sp.label(text=iface_("Render Samples are Less than Preview Samples"), icon="ERROR")
                     sp.prop(scene.eevee, "taa_samples")
                     sp.prop(scene.eevee, "taa_render_samples")
                 elif "cycles_aa_sample" in vls.keys():
                     row = layout.row(align=True)
                     row.separator(factor=2)
                     sp = row.split(align=True,factor=.5)
-                    sp.label(text=trans("Render Samples are Less than Preview Samples"), icon="ERROR")
+                    sp.label(text=iface_("Render Samples are Less than Preview Samples"), icon="ERROR")
                     sp.prop(scene.cycles, "preview_aa_samples")
                     sp.prop(scene.cycles, "aa_samples")
                 if "composite" in vls.keys():
                     row = layout.row(align=True)
                     row.separator(factor=2)
-                    row.label(text=trans("Input Sources of Composite Output and Viewer Output are Different"), icon="ERROR")
+                    row.label(text=iface_("Input Sources of Composite Output and Viewer Output are Different"), icon="ERROR")
 
                 if "view_layers" in vls.keys():
                     for vl, colls in vls["view_layers"].items():
@@ -251,12 +304,12 @@ class FINALCHECK_PT_Menu(FinalCheckPanel, bpy.types.Panel):
                             self.separator(row, 2, 2)
                             row.operator(FINALCHECK_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if objs["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(objs))
                             if hasattr(coll, "collection"): #Master Collection doesn't have show/hide status.
-                                row.label(text=coll.name, icon="OUTLINER_COLLECTION", translate=False)
+                                row.label(text=coll.name, icon=COLLECTION_ICON_NAME, translate=False)
                                 row.prop(coll, "hide_viewport", icon_only=True,emboss=False)
                                 row.prop(coll.collection, "hide_viewport", icon_only=True,emboss=False)
                                 row.prop(coll.collection, "hide_render", icon_only=True,emboss=False)
                             else:
-                                row.label(text=trans("Master Collection"), icon="OUTLINER_COLLECTION")
+                                row.label(text=iface_("Master Collection"), icon=COLLECTION_ICON_NAME)
                             if objs["hide"]:
                                 continue
                             for obj, mods in objs["objs"].items():
@@ -284,7 +337,7 @@ class FINALCHECK_PT_Menu(FinalCheckPanel, bpy.types.Panel):
                                     row = layout.row(align=True)
                                     self.separator(row, 4, 2)
                                     row.label(icon="DOT")
-                                    row.label(text=trans("Instancing"), icon="MOD_INSTANCE")
+                                    row.label(text=iface_("Instancing"), icon="MOD_INSTANCE")
                                     row.prop(obj, "show_instancer_for_viewport", icon_only=True, icon="RESTRICT_VIEW_OFF" if obj.show_instancer_for_viewport else "RESTRICT_VIEW_ON",emboss=False)
                                     row.prop(obj, "show_instancer_for_render", icon_only=True, icon="RESTRICT_RENDER_OFF" if obj.show_instancer_for_render else "RESTRICT_RENDER_ON",emboss=False)
                                 for mod, value in mods["mods"].items():
@@ -300,21 +353,21 @@ class FINALCHECK_PT_Menu(FinalCheckPanel, bpy.types.Panel):
                                         row = layout.row(align=True)
                                         self.separator(row, 5, 2)
                                         row.label(icon="DOT")
-                                        row.label(text=trans("Show Emitter"), icon="PARTICLES")
+                                        row.label(text=iface_("Show Emitter"), icon="PARTICLES")
                                         row.prop(value["show_emitter"], "show_instancer_for_viewport", icon="RESTRICT_VIEW_OFF" if obj.show_instancer_for_viewport else "RESTRICT_VIEW_ON", icon_only=True,emboss=False)
                                         row.prop(value["show_emitter"], "show_instancer_for_render", icon="RESTRICT_RENDER_OFF" if obj.show_instancer_for_render else "RESTRICT_RENDER_ON", icon_only=True,emboss=False)
                                     if "child_amount" in value:
                                         row = layout.row(align=True)
                                         self.separator(row, 5, 2)
                                         row.label(icon="DOT")
-                                        row.label(text=trans("Child Amount"), icon="PARTICLES")
+                                        row.label(text=iface_("Child Amount"), icon="PARTICLES")
                                         row.prop(value["child_amount"], "child_nbr")
                                         row.prop(value["child_amount"], "rendered_child_count")
                                     if "display_percentage" in value:
                                         row = layout.row(align=True)
                                         self.separator(row, 5, 2)
                                         row.label(icon="DOT")
-                                        row.label(text=trans("Viewport Display Amount"), icon="PARTICLES")
+                                        row.label(text=iface_("Viewport Display Amount"), icon="PARTICLES")
                                         row.prop(value["display_percentage"], "display_percentage")
                                 for gpfx, value in mods["gpfxs"].items():
                                     row = layout.row(align=True)
@@ -334,55 +387,62 @@ class FINALCHECK_PT_Menu(FinalCheckPanel, bpy.types.Panel):
             row = layout.row(align=True)
             row.alignment = "CENTER"
             row.alert=True
-            row.label(text=trans("Outdated Data: Please Check Again"))
+            row.label(text=iface_("Outdated Data: Please Check Again"))
 
 class FINALCHECK_PT_Menu_Prefs(FinalCheckPanel, bpy.types.Panel):
     bl_parent_id = "FINALCHECK_PT_Menu"
-    bl_label = bpy.app.translations.pgettext_iface("Preferences")
+    bl_label = iface_("Preferences")
+
+    def getName(self, prop):
+        try:
+            name = prop.keywords['name']
+        except AttributeError: # blender 2.92 or before
+            name = prop[1]['name']
+        return iface_(name)
 
     def draw(self, context):
         wm = context.window_manager
         types = bpy.types.WindowManager
-        trans=bpy.app.translations.pgettext_iface
         layout = self.layout
-        layout.label(text=trans("Check"))
+        layout.label(text=iface_("Check"))
         box = layout.box()
-        box.prop(wm, "finalCheck_prefs_currentScene", text=trans(types.finalCheck_prefs_currentScene.keywords["name"]))
+        box.prop(wm, "finalCheck_prefs_autoCheck", text=self.getName(types.finalCheck_prefs_autoCheck))
+        box.prop(wm, "finalCheck_prefs_currentScene", text=self.getName(types.finalCheck_prefs_currentScene))
         row = box.row()
         if not wm.finalCheck_prefs_currentScene:
             row.active = False
         row.separator()
-        row.prop(wm, "finalCheck_prefs_currentViewLayer", text=trans(types.finalCheck_prefs_currentViewLayer.keywords["name"]))
+        row.prop(wm, "finalCheck_prefs_currentViewLayer", text=self.getName(types.finalCheck_prefs_currentViewLayer))
 
-        layout.label(text=trans("Check These Statues"))
+        layout.label(text=iface_("Check These Statues"))
         box = layout.box()
-        box.prop(wm, "finalCheck_prefs_collVisibility", text=trans(types.finalCheck_prefs_collVisibility.keywords["name"]))
-        box.prop(wm, "finalCheck_prefs_objVisibility", text=trans(types.finalCheck_prefs_objVisibility.keywords["name"]))
-        box.prop(wm, "finalCheck_prefs_missingFiles", text=trans(types.finalCheck_prefs_missingFiles.keywords["name"]))
-        box.prop(wm, "finalCheck_prefs_renderRegion", text=trans(types.finalCheck_prefs_renderRegion.keywords["name"]))
-        box.prop(wm, "finalCheck_prefs_resolutionPercentage", text=trans(types.finalCheck_prefs_resolutionPercentage.keywords["name"]))
-        box.prop(wm, "finalCheck_prefs_samples", text=trans(types.finalCheck_prefs_samples.keywords["name"]))
-        box.prop(wm, "finalCheck_prefs_instance", text=trans(types.finalCheck_prefs_instance.keywords["name"]))
-        box.prop(wm, "finalCheck_prefs_modifiers", text=trans(types.finalCheck_prefs_modifiers.keywords["name"]))
+        box.prop(wm, "finalCheck_prefs_collVisibility", text=self.getName(types.finalCheck_prefs_collVisibility))
+        box.prop(wm, "finalCheck_prefs_objVisibility", text=self.getName(types.finalCheck_prefs_objVisibility))
+        box.prop(wm, "finalCheck_prefs_missingFiles", text=self.getName(types.finalCheck_prefs_missingFiles))
+        box.prop(wm, "finalCheck_prefs_renderRegion", text=self.getName(types.finalCheck_prefs_renderRegion))
+        box.prop(wm, "finalCheck_prefs_resolutionPercentage", text=self.getName(types.finalCheck_prefs_resolutionPercentage))
+        box.prop(wm, "finalCheck_prefs_samples", text=self.getName(types.finalCheck_prefs_samples))
+        box.prop(wm, "finalCheck_prefs_instance", text=self.getName(types.finalCheck_prefs_instance))
+        box.prop(wm, "finalCheck_prefs_modifiers", text=self.getName(types.finalCheck_prefs_modifiers))
         row = box.row()
         row.alignment = "LEFT"
-        row.prop(wm, "finalCheck_prefs_composite", text=trans(types.finalCheck_prefs_composite.keywords["name"]))
-        row.label(text=trans("(α Ver.)"))
+        row.prop(wm, "finalCheck_prefs_composite", text=self.getName(types.finalCheck_prefs_composite))
+        row.label(text=iface_("(α Ver.)"))
 
-        box.label(text=trans("Particles"))
+        box.label(text=iface_("Particles"))
         row = box.row()
         row.separator(factor=1)
-        row.prop(wm, "finalCheck_prefs_particleShowEmitter", text=trans(types.finalCheck_prefs_particleShowEmitter.keywords["name"]))
+        row.prop(wm, "finalCheck_prefs_particleShowEmitter", text=self.getName(types.finalCheck_prefs_particleShowEmitter))
         row = box.row()
         row.separator(factor=1)
-        row.prop(wm, "finalCheck_prefs_particleChildAmount", text=trans(types.finalCheck_prefs_particleChildAmount.keywords["name"]))
+        row.prop(wm, "finalCheck_prefs_particleChildAmount", text=self.getName(types.finalCheck_prefs_particleChildAmount))
         row = box.row()
         row.separator(factor=1)
-        row.prop(wm, "finalCheck_prefs_particleDisplayPercentage", text=trans(types.finalCheck_prefs_particleDisplayPercentage.keywords["name"]))
-        box.label(text=trans("Grease Pencil"))
+        row.prop(wm, "finalCheck_prefs_particleDisplayPercentage", text=self.getName(types.finalCheck_prefs_particleDisplayPercentage))
+        box.label(text=iface_("Grease Pencil"))
         row = box.row()
         row.separator(factor=1)
-        row.prop(wm, "finalCheck_prefs_gpencilModifiers", text=trans(types.finalCheck_prefs_gpencilModifiers.keywords["name"]))
+        row.prop(wm, "finalCheck_prefs_gpencilModifiers", text=self.getName(types.finalCheck_prefs_gpencilModifiers))
         row = box.row()
         row.separator(factor=1)
-        row.prop(wm, "finalCheck_prefs_gpencilShaderEffects", text=trans(types.finalCheck_prefs_gpencilShaderEffects.keywords["name"]))
+        row.prop(wm, "finalCheck_prefs_gpencilShaderEffects", text=self.getName(types.finalCheck_prefs_gpencilShaderEffects))
