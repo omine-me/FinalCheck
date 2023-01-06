@@ -51,9 +51,9 @@ def toggleAutoCheck_disable(context):
     inherited_render_idname = bpy.ops.render.render.idname_py()
     kc = context.window_manager.keyconfigs.user
     for km in ['Screen', 'Screen Editing']:
-        km = kc.keymaps[km]
-        if km.name not in kc.keymaps:
+        if km not in kc.keymaps:
             continue
+        km = kc.keymaps[km]
         for km_item in km.keymap_items:
             if km_item.idname == inherited_render_idname:
                 correspondent_keymap_found = False
@@ -86,9 +86,9 @@ def toggleAutoCheck(self=None, context=None):
         inherited_render_idname = bpy.ops.render.render.idname_py()
         kc = context.window_manager.keyconfigs.user
         for km in ['Screen', 'Screen Editing']: # Screen Editing is used in Industry_Compatible keymap
-            km = kc.keymaps[km]
-            if km.name not in kc.keymaps:
+            if km not in kc.keymaps:
                 continue
+            km = kc.keymaps[km]
             for km_item in km.keymap_items:
                 if km_item.idname == inherited_render_idname:
                     new_km = km.keymap_items.new(bpy.types.FINALCHECK_OT_render.bl_idname,
@@ -121,123 +121,122 @@ def initProps():
         name="Auto Check",
         default=prefs["finalCheck_prefs_autoCheck"]\
                 if "finalCheck_prefs_autoCheck" in prefs else False,
-        description=tip_("Check Automatically Before Render"),
+        description=tip_("Check automatically before render"),
         update=toggleAutoCheck,
     )
     wm.finalCheck_prefs_currentScene = BoolProperty(
         name="Current Scene Only",
         default=prefs["finalCheck_prefs_currentScene"]\
                 if "finalCheck_prefs_currentScene" in prefs else False,
-        description=tip_("Check Current Scene Only"),
+        description=tip_("Check current scene only"),
         update=updatePrefs,
     )
     wm.finalCheck_prefs_currentViewLayer = BoolProperty(
         name="Current View Layer Only",
         default=prefs["finalCheck_prefs_currentViewLayer"]\
                 if "finalCheck_prefs_currentViewLayer" in prefs else False,
-        description=tip_("Check Current View Layer Only (When Current Scene Only Is True)"),
+        description=tip_("Check current view layer only (When Current Scene Only is enabled)"),
         update=updatePrefs,
     )
     wm.finalCheck_prefs_collVisibility = BoolProperty(
         name="Collections Visibiiity",
         default=prefs["finalCheck_prefs_collVisibility"]\
                 if "finalCheck_prefs_collVisibility" in prefs else True,
-        description=tip_("Does Visibility of Collections in Viewports and Renders Differ?"),
+        description=tip_("Compare visibility of collections in viewport and render"),
         update=updatePrefs,
     )
     wm.finalCheck_prefs_objVisibility = BoolProperty(
         name="Objects Visibiiity",
         default=prefs["finalCheck_prefs_objVisibility"]\
                 if "finalCheck_prefs_objVisibility" in prefs else True,
-        description=tip_("Does Visibility of Objects in Viewports and Renders Differ?"),
+        description=tip_("Compare visibility of objects in viewport and render"),
         update=updatePrefs,
     )
     wm.finalCheck_prefs_missingFiles = BoolProperty(
         name="Missing Files",
         default=prefs["finalCheck_prefs_missingFiles"]\
                 if "finalCheck_prefs_missingFiles" in prefs else True,
-        description=tip_("Is an Image Path Broken?"),
+        description=tip_("Check image path validity"),
         update=updatePrefs,
     )
     wm.finalCheck_prefs_renderRegion = BoolProperty(
         name="Render Region",
         default=prefs["finalCheck_prefs_renderRegion"]\
                 if "finalCheck_prefs_renderRegion" in prefs else True,
-        description=tip_("Is Render Region Set and the Area Reduced?"),
+        description=tip_("Check if Render Region is not set"),
         update=updatePrefs,
     )
     wm.finalCheck_prefs_resolutionPercentage = BoolProperty(
         name="Resolution %",
         default=prefs["finalCheck_prefs_resolutionPercentage"]\
                 if "finalCheck_prefs_resolutionPercentage" in prefs else True,
-        description=tip_("Is Resolution% Under 100%?"),
+        description=tip_("Check if Resolution% is greater than or equal to 100%"),
         update=updatePrefs,
     )
     wm.finalCheck_prefs_samples = BoolProperty(
         name="Samples",
         default=prefs["finalCheck_prefs_samples"]\
                 if "finalCheck_prefs_samples" in prefs else True,
-        description=tip_("Is Render Samples Under Preview Samples?"),
+        description=tip_("Check if render samples are greater than or equal to preview samples"),
         update=updatePrefs,
     )
     wm.finalCheck_prefs_instance = BoolProperty(
         name="Instancing",
         default=prefs["finalCheck_prefs_instance"]\
                 if "finalCheck_prefs_instance" in prefs else True,
-        description=tip_("Does Visibility of Instancer in Viewports and Renders Differ?"),
+        description=tip_("Compare visibility of instancer in viewport and render"),
         update=updatePrefs,
     )
     wm.finalCheck_prefs_modifiers = BoolProperty(
         name="Modifiers",
         default=prefs["finalCheck_prefs_modifiers"]\
                 if "finalCheck_prefs_modifiers" in prefs else True,
-        description=tip_("Does Visibility of Modifiers in Viewports and Renders Differ?"),
+        description=tip_("Compare visibility of modifiers in viewport and render"),
         update=updatePrefs,
     )
     wm.finalCheck_prefs_composite = BoolProperty(
         name="Composite",
         default=prefs["finalCheck_prefs_composite"]\
                 if "finalCheck_prefs_composite" in prefs else False,
-        description=tip_("Do Inputs of Viewer Node and Composite Node Differ? This I Currently Incomplete Due to Limitations of The Blender Python API"),
+        description=tip_("Check if inputs of Viewer node and Composite node are the same. This is currently incomplete due to limitations of Blender Python API"),
         update=updatePrefs,
     )
     wm.finalCheck_prefs_particleShowEmitter = BoolProperty(
         name="Show Emitter",
         default=prefs["finalCheck_prefs_particleShowEmitter"]\
                 if "finalCheck_prefs_particleShowEmitter" in prefs else True,
-        description=tip_("Does Visibility of Particle Emitter in Viewports and Renders Differ?"),
+        description=tip_("Compare visibility of particle emitter in viewport and render"),
         update=updatePrefs,
     )
     wm.finalCheck_prefs_particleChildAmount = BoolProperty(
         name="Child Amount",
         default=prefs["finalCheck_prefs_particleChildAmount"]\
                 if "finalCheck_prefs_particleChildAmount" in prefs else True,
-        description=tip_("Does Child Amount of Particles in Viewports and Renders Differ?"),
+        description=tip_("Check if child amount of particles in viewport and render are the same"),
         update=updatePrefs,
     )
     wm.finalCheck_prefs_particleDisplayPercentage = BoolProperty(
         name="Viewport Display Amount",
         default=prefs["finalCheck_prefs_particleDisplayPercentage"]\
-                if "finalCheck_prefs_particleDisplayPercentage" in prefs else True,
-        description=tip_("Is Amount of Particles in Viewports Under 100%?"),
+                if "finalCheck_prefs_particleDisplayPercentage" in prefs else False,
+        description=tip_("Check if amount of particles in viewport is 100%"),
         update=updatePrefs,
     )
     wm.finalCheck_prefs_gpencilModifiers = BoolProperty(
         name="Modifiers",
         default=prefs["finalCheck_prefs_gpencilModifiers"]\
                 if "finalCheck_prefs_gpencilModifiers" in prefs else True,
-        description=tip_("Does Visibility of Modifiers in Viewports and Renders Differ?"),
+        description=tip_("Compare visibility of modifiers in viewport and render"),
         update=updatePrefs,
     )
     wm.finalCheck_prefs_gpencilShaderEffects = BoolProperty(
         name="Effects",
         default=prefs["finalCheck_prefs_gpencilShaderEffects"]\
                 if "finalCheck_prefs_gpencilShaderEffects" in prefs else True,
-        description=tip_("Does Visibility of Effects in Viewports and Renders Differ?"),
+        description=tip_("Compare visibility of effects in viewport and render"),
         update=updatePrefs,
     )
     wm.finalCheck = finalCheckClass.FinalCheck()
-    # toggleAutoCheck(bpy, bpy.context)
 
 def delProps():
     wm = bpy.types.WindowManager
@@ -262,10 +261,7 @@ def delProps():
 
 @persistent
 def resetDataHandler(scene):
-    wm = bpy.context.window_manager
-    wm.finalCheck.checkedItems.clear()
-    wm.finalCheck.missingFiles.clear()
-    wm.finalCheck.notCheckedYet = True
+    initProps()
 
 classes = [
     main.FINALCHECK_OT_Check,
@@ -281,11 +277,17 @@ classes = [
 def del_lazy_load(self=None, context=None):
     bpy.app.handlers.load_post.remove(lazy_load)
 
+# lazy_load_done is needed when open blender with specific file
+# because multiple bpy.app.handlers.load_post triggers.
+lazy_load_done = False
 # need persistent but one time is enough. So delete this finally.
 @persistent
 def lazy_load(scene):
-    bpy.app.timers.register(toggleAutoCheck, first_interval=.3, persistent=True)
-    bpy.app.timers.register(del_lazy_load, first_interval=.5, persistent=True)
+    global lazy_load_done
+    if not lazy_load_done:
+        lazy_load_done = True
+        bpy.app.timers.register(toggleAutoCheck, first_interval=.3, persistent=True)
+        bpy.app.timers.register(del_lazy_load, first_interval=.5, persistent=True)
 
 def register():
     for c in classes:

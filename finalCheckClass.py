@@ -210,28 +210,34 @@ class FinalCheck:
                 sceneDict["hide"] = False
                 self.checkedItems[scene] = sceneDict
 
+    def getAttr(self, prop, key):
+        try:
+            return prop.keywords[key]
+        except AttributeError:  # blender 2.92 or before
+            return prop[1][key]
+
     def savePrefs(self):
         prefFilePath = os.path.join(os.path.dirname(__file__), "FinalCheckPrefs.txt")
         types = bpy.types.WindowManager
         wm = bpy.context.window_manager
         prefs = {
-            types.finalCheck_prefs_autoCheck.keywords["attr"]: wm.finalCheck_prefs_autoCheck,
-            types.finalCheck_prefs_currentScene.keywords["attr"]: wm.finalCheck_prefs_currentScene,
-            types.finalCheck_prefs_currentViewLayer.keywords["attr"]: wm.finalCheck_prefs_currentViewLayer,
-            types.finalCheck_prefs_collVisibility.keywords["attr"]: wm.finalCheck_prefs_collVisibility,
-            types.finalCheck_prefs_objVisibility.keywords["attr"]: wm.finalCheck_prefs_objVisibility,
-            types.finalCheck_prefs_missingFiles.keywords["attr"]: wm.finalCheck_prefs_missingFiles,
-            types.finalCheck_prefs_renderRegion.keywords["attr"]: wm.finalCheck_prefs_renderRegion,
-            types.finalCheck_prefs_resolutionPercentage.keywords["attr"]: wm.finalCheck_prefs_resolutionPercentage,
-            types.finalCheck_prefs_samples.keywords["attr"]: wm.finalCheck_prefs_samples,
-            types.finalCheck_prefs_instance.keywords["attr"]: wm.finalCheck_prefs_instance,
-            types.finalCheck_prefs_modifiers.keywords["attr"]: wm.finalCheck_prefs_modifiers,
-            types.finalCheck_prefs_composite.keywords["attr"]: wm.finalCheck_prefs_composite,
-            types.finalCheck_prefs_particleShowEmitter.keywords["attr"]: wm.finalCheck_prefs_particleShowEmitter,
-            types.finalCheck_prefs_particleChildAmount.keywords["attr"]: wm.finalCheck_prefs_particleChildAmount,
-            types.finalCheck_prefs_particleDisplayPercentage.keywords["attr"]: wm.finalCheck_prefs_particleDisplayPercentage,
-            types.finalCheck_prefs_gpencilModifiers.keywords["attr"]: wm.finalCheck_prefs_gpencilModifiers,
-            types.finalCheck_prefs_gpencilShaderEffects.keywords["attr"]: wm.finalCheck_prefs_gpencilShaderEffects
+            self.getAttr(types.finalCheck_prefs_autoCheck, 'attr'): wm.finalCheck_prefs_autoCheck,
+            self.getAttr(types.finalCheck_prefs_currentScene, 'attr'): wm.finalCheck_prefs_currentScene,
+            self.getAttr(types.finalCheck_prefs_currentViewLayer, 'attr'): wm.finalCheck_prefs_currentViewLayer,
+            self.getAttr(types.finalCheck_prefs_collVisibility, 'attr'): wm.finalCheck_prefs_collVisibility,
+            self.getAttr(types.finalCheck_prefs_objVisibility, 'attr'): wm.finalCheck_prefs_objVisibility,
+            self.getAttr(types.finalCheck_prefs_missingFiles, 'attr'): wm.finalCheck_prefs_missingFiles,
+            self.getAttr(types.finalCheck_prefs_renderRegion, 'attr'): wm.finalCheck_prefs_renderRegion,
+            self.getAttr(types.finalCheck_prefs_resolutionPercentage, 'attr'): wm.finalCheck_prefs_resolutionPercentage,
+            self.getAttr(types.finalCheck_prefs_samples, 'attr'): wm.finalCheck_prefs_samples,
+            self.getAttr(types.finalCheck_prefs_instance, 'attr'): wm.finalCheck_prefs_instance,
+            self.getAttr(types.finalCheck_prefs_modifiers, 'attr'): wm.finalCheck_prefs_modifiers,
+            self.getAttr(types.finalCheck_prefs_composite, 'attr'): wm.finalCheck_prefs_composite,
+            self.getAttr(types.finalCheck_prefs_particleShowEmitter, 'attr'): wm.finalCheck_prefs_particleShowEmitter,
+            self.getAttr(types.finalCheck_prefs_particleChildAmount, 'attr'): wm.finalCheck_prefs_particleChildAmount,
+            self.getAttr(types.finalCheck_prefs_particleDisplayPercentage, 'attr'): wm.finalCheck_prefs_particleDisplayPercentage,
+            self.getAttr(types.finalCheck_prefs_gpencilModifiers, 'attr'): wm.finalCheck_prefs_gpencilModifiers,
+            self.getAttr(types.finalCheck_prefs_gpencilShaderEffects, 'attr'): wm.finalCheck_prefs_gpencilShaderEffects
         }
         with open(prefFilePath, 'w', encoding='utf-8', newline='\n') as fp:
             json.dump(prefs, fp, indent=2)

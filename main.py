@@ -26,15 +26,15 @@ class FINALCHECK_OT_Check(bpy.types.Operator):
         finalCheck.check()
 
         if finalCheck.missingFiles or finalCheck.checkedItems:
-            self.report({'WARNING'}, iface_("Problems Detected"))
+            self.report({'WARNING'}, iface_("Problems detected"))
         else:
-            self.report({'INFO'}, iface_("No Problems Detected"))
+            self.report({'INFO'}, iface_("No problems detected"))
         return {'FINISHED'}
 
 class FINALCHECK_OT_SetObjHide(bpy.types.Operator):
     bl_idname = "finalcheck.set_obj_hide"
-    bl_label = "Toggle Object"
-    bl_description = tip_("Toggle Visibility")
+    bl_label = "Hide in viewport"
+    bl_description = tip_("Toggle visibility")
     bl_options = {'REGISTER', 'UNDO'}
 
     obj: StringProperty(
@@ -53,7 +53,7 @@ class FINALCHECK_OT_SetObjHide(bpy.types.Operator):
     def ShowMessageBox(self):
         def draw(self, context):
             self.layout.label(text=iface_("This Item cannot be Changed from Other Scenes"))
-        bpy.context.window_manager.popup_menu(draw, title = iface_("Toggle Scene to {}").format(self.scene), icon = "HIDE_OFF")
+        bpy.context.window_manager.popup_menu(draw, title = iface_("Toggle scene to {}").format(self.scene), icon = "HIDE_OFF")
     def execute(self, context):
         if context.scene.name != self.scene:
             self.ShowMessageBox()
@@ -65,8 +65,8 @@ class FINALCHECK_OT_SetObjHide(bpy.types.Operator):
 
 class FINALCHECK_OT_ToggleVisibilityInPanel(bpy.types.Operator):
     bl_idname = "finalcheck.toggle_visibility_in_panel"
-    bl_label = "Toggle Visibility"
-    bl_description = tip_("Toggle Visibility")
+    bl_label = "Toggle visibility"
+    bl_description = tip_("Toggle visibility")
     bl_options = {'REGISTER', 'UNDO'}
 
     objId: StringProperty(
@@ -91,13 +91,13 @@ class FINALCHECK_OT_ClearRenderRegion(bpy.types.Operator):
     def execute(self, context):
         renderSettings = PyObj_FromPtr(int(self.objId))
         context.window_manager.finalCheck.clearRenderRegion(renderSettings)
-        self.report({'INFO'}, iface_("Render Region Cleared"))
+        self.report({'INFO'}, iface_("Render Region cleared"))
         return {'FINISHED'}
 
 class FINALCHECK_OT_SelectObject(bpy.types.Operator):
     bl_idname = "finalcheck.select_object"
-    bl_label = "Select Object"
-    bl_description = tip_("Select Object")
+    bl_label = "Select object"
+    bl_description = tip_("Select object")
     bl_options = {'REGISTER', 'UNDO'}
 
     objName: StringProperty(
@@ -110,8 +110,8 @@ class FINALCHECK_OT_SelectObject(bpy.types.Operator):
     )
     def ShowMessageBox(self):
         def draw(self, context):
-            self.layout.label(text=iface_("Cannot Select Objects of Ohter Scene"))
-        bpy.context.window_manager.popup_menu(draw, title = iface_("Toggle Scene to {}").format(self.scene), icon = "ERROR")
+            self.layout.label(text=iface_("Cannot select objects of ohter scene"))
+        bpy.context.window_manager.popup_menu(draw, title = iface_("Toggle scene to {}").format(self.scene), icon = "ERROR")
     def execute(self, context):
         if context.scene.name != self.scene:
             self.ShowMessageBox()
@@ -155,7 +155,7 @@ class FINALCHECK_OT_Render(bpy.types.Operator):
         finalCheck.check()
 
         if finalCheck.missingFiles or finalCheck.checkedItems:
-            self.report({'WARNING'}, iface_("Problems Detected"))
+            self.report({'WARNING'}, iface_("Problems detected"))
         else:
             bpy.ops.render.render({}, 'INVOKE_DEFAULT', True, 
                                     animation=self.animation,
@@ -163,7 +163,7 @@ class FINALCHECK_OT_Render(bpy.types.Operator):
                                     use_viewport=self.use_viewport,
                                     layer=self.layer,
                                     scene=self.scene)
-            self.report({'INFO'}, iface_("No Problems Detected"))
+            self.report({'INFO'}, iface_("No problems detected"))
         return {'FINISHED'}
 
 class FinalCheckPanel:
@@ -236,7 +236,7 @@ class FINALCHECK_PT_Menu(FinalCheckPanel, bpy.types.Panel):
             if not missingFiles and not finalCheck.checkedItems and not finalCheck.notCheckedYet:
                 row = layout.row(align=True)
                 row.alignment = "CENTER"
-                row.label(text=iface_("No Problems Detected"))
+                row.label(text=iface_("No problems detected"))
                 return
             if missingFiles and "files" in missingFiles:
                 row = layout.row(align=True)
@@ -257,7 +257,7 @@ class FINALCHECK_PT_Menu(FinalCheckPanel, bpy.types.Panel):
                 if "border" in vls.keys():
                     row = layout.row(align=True)
                     row.separator(factor=2)
-                    row.label(text=iface_("Render Region is Set"), icon="ERROR")
+                    row.label(text=iface_("Render Region is set"), icon="ERROR")
                     row.operator(FINALCHECK_OT_ClearRenderRegion.bl_idname, text=iface_("Clear")).objId = str(id(vls["border"]))
                 if "resolution_percentage" in vls.keys():
                     row = layout.row(align=True)
@@ -268,27 +268,27 @@ class FINALCHECK_PT_Menu(FinalCheckPanel, bpy.types.Panel):
                     row = layout.row(align=True)
                     row.separator(factor=2)
                     sp = row.split(align=True,factor=.5)
-                    sp.label(text=iface_("Render Samples are Less than Preview Samples"), icon="ERROR")
+                    sp.label(text=iface_("Render samples are less than preview samples"), icon="ERROR")
                     sp.prop(scene.cycles, "preview_samples")
                     sp.prop(scene.cycles, "samples")
                 elif "eevee_sample" in vls.keys():
                     row = layout.row(align=True)
                     row.separator(factor=2)
                     sp = row.split(align=True,factor=.5)
-                    sp.label(text=iface_("Render Samples are Less than Preview Samples"), icon="ERROR")
+                    sp.label(text=iface_("Render samples are less than preview samples"), icon="ERROR")
                     sp.prop(scene.eevee, "taa_samples")
                     sp.prop(scene.eevee, "taa_render_samples")
                 elif "cycles_aa_sample" in vls.keys():
                     row = layout.row(align=True)
                     row.separator(factor=2)
                     sp = row.split(align=True,factor=.5)
-                    sp.label(text=iface_("Render Samples are Less than Preview Samples"), icon="ERROR")
+                    sp.label(text=iface_("Render samples are less than preview samples"), icon="ERROR")
                     sp.prop(scene.cycles, "preview_aa_samples")
                     sp.prop(scene.cycles, "aa_samples")
                 if "composite" in vls.keys():
                     row = layout.row(align=True)
                     row.separator(factor=2)
-                    row.label(text=iface_("Input Sources of Composite Output and Viewer Output are Different"), icon="ERROR")
+                    row.label(text=iface_("Input of Composite node and Viewer node are different"), icon="ERROR")
 
                 if "view_layers" in vls.keys():
                     for vl, colls in vls["view_layers"].items():
@@ -319,7 +319,6 @@ class FINALCHECK_PT_Menu(FinalCheckPanel, bpy.types.Panel):
                                 row.alignment = "LEFT"
                                 self.separator(row, 3, 2)
                                 row.operator(FINALCHECK_OT_ToggleVisibilityInPanel.bl_idname, text="", icon="DISCLOSURE_TRI_RIGHT" if mods["hide"] else "DISCLOSURE_TRI_DOWN",emboss=False).objId = str(id(mods))
-                                # row.label(text=obj.name, icon=self.getObjType(obj), translate=False)
                                 objName = row.operator(FINALCHECK_OT_SelectObject.bl_idname, text=obj.name, icon=self.getObjType(obj), translate=False, emboss=False)
                                 objName.objName = obj.name
                                 objName.scene = scene.name
@@ -387,7 +386,7 @@ class FINALCHECK_PT_Menu(FinalCheckPanel, bpy.types.Panel):
             row = layout.row(align=True)
             row.alignment = "CENTER"
             row.alert=True
-            row.label(text=iface_("Outdated Data: Please Check Again"))
+            row.label(text=iface_("Outdated Data: Please check again"))
 
 class FINALCHECK_PT_Menu_Prefs(FinalCheckPanel, bpy.types.Panel):
     bl_parent_id = "FINALCHECK_PT_Menu"

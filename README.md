@@ -47,27 +47,27 @@ You don't have to extract zip file.
 
 In Preferences sub-panel, you can toggle which items will be checked. These preferences are saved automatically.
 
-[**[New!]** Checking automatically when rendering is available.](./ChangeLog.md)
+[**[New!]** Checking automatically when rendering is available.](./CHANGELOG.md)
 
 ### Check Items
 
-- **Collections Visibility**: Does visibility of collections in viewports and renders differ?
-- **Objects Visibility**: Does visibility of objects in viewports and renders differ?
-- **Missing Files**: Is an image path broken? (Ignore packed file's path.)
-- **Render Region**: Is render region set and the area reduced?
-- **Resolution%**: Is resolution% under 100%?
-- **Samples**: Is render samples under preview samples?
-- **Instancing**: Does visibility of instancer in viewports and renders differ?
-- **Modifiers**: Does visibility of modifiers in viewports and renders differ?
-- **Composite** (alpha version): Do inputs of viewer node and composite node differ?  
-  Composite checking is currently incomplete due to limitations of the Blender Python API.
+- **Collections Visibility**: Compare visibility of collections in viewport and render.
+- **Objects Visibility**: Compare visibility of objects in viewport and render.
+- **Missing Files**: Check image path validity.
+- **Render Region**: Check if Render Region is not set.
+- **Resolution%**: Check if Resolution% is greater than or equal to 100%.
+- **Samples**: Check if render samples are greater than or equal to preview samples.
+- **Instancing**: Compare visibility of instancer in viewport and render.
+- **Modifiers**: Compare visibility of modifiers in viewport and render.
+- **Composite** (alpha version): Check if inputs of Viewer node and Composite node are the same.
+  This is currently incomplete due to limitations of Blender Python API.
 - **Particles**:
-  - **Show Emitter**: Does Visibility of particle emitter in viewports and renders differ?
-  - **Child Amount**: Does child amount of particles in viewports and renders differ?
-  - **Viewport Display Amount**: Is amount of particles in viewports under 100%?
+  - **Show Emitter**: Compare visibility of particle emitter in viewport and render.
+  - **Child Amount**: Check if child amount of particles in viewport and render are the same.
+  - **Viewport Display Amount**: Check if amount of particles in viewport is 100%.
 - **Grease Pencil**:
-  - **Modifiers**: Does visibility of modifiers in viewports and renders differ?
-  - **Effects**: Does visibility of effects in viewports and renders differ?
+  - **Modifiers**: Compare visibility of modifiers in viewport and render.
+  - **Effects**: Compare visibility of effects in viewport and render.
 
 You can also choose where to check: all scenes or current scene/view_layer only.
 
@@ -136,27 +136,26 @@ zip ファイルを展開する必要はありません。
 
 プリファレンスサブパネルから、チェックする項目を設定できます。これらは自動で保存されます。
 
-[**[New!]** レンダリング時に自動でチェックできるようになりました。](./ChangeLog.md)
+[**[New!]** レンダリング時に自動でチェックできるようになりました。](./CHANGELOG.md)
 
 ### チェックする項目
 
-- **コレクションの可視性**: ビューポートとレンダーでコレクションの可視性が異なるか。
-- **オブジェクトの可視性**: ビューポートとレンダーでオブジェクトの可視性が異なるか。
-- **パスが不明なファイル**: 画像ファイルのパスが壊れているか。(パックされたファイルのパスはチェックしません。)
+- **コレクションの可視性**: ビューポートとレンダーでコレクションの可視性が同じか。
+- **オブジェクトの可視性**: ビューポートとレンダーでオブジェクトの可視性が同じか。
+- **パスが不明なファイル**: 画像ファイルのパスが有効か。
 - **レンダー領域**: レンダー領域が設定されていて、レンダー領域が縮小しているか。
-- **解像度%**: 解像度%が 100%より小さいか。
-- **サンプル数**: レンダーのサンプル数がビューポートのサンプル数より小さいか。
-- **インスタンス化**: ビューポートとレンダーでインスタンサーの可視性が異なるか。
-- **モディファイア**: ビューポートとレンダーでモディファイアの可視性が異なるか。
-- **コンポジット** (アルファ版): ビューアーノードとコンポジットノードのインプットが異なるか。  
-  コンポジットのチェックは、Blender Python API の制約により現状不完全です。
+- **解像度%**: 解像度%が100%以上か。
+- **サンプル数**: レンダーのサンプル数がビューポートのサンプル数以上か。
+- **インスタンス化**: ビューポートとレンダーでインスタンサーの可視性が同じか。
+- **モディファイア**: ビューポートとレンダーでモディファイアの可視性が同じか。
+- **コンポジット** (アルファ版): ビューアーノードとコンポジットノードのインプットが同じか。コンポジットのチェックは、Blender Python API の制約により現状不完全です。
 - **パーティクル**:
-  - **エミッターを表示**: ビューポートとレンダーでエミッターの可視性が異なるか。
-  - **子パーティクルの量**: ビューポートとレンダーで子パーティクルの量が異なるか。
-  - **パーティクルの表示率**: ビューポートでのパーティクルの表示率が 100%より小さいか。
+  - **エミッターを表示**: ビューポートとレンダーでエミッターの可視性が同じか。
+  - **子パーティクルの量**: ビューポートとレンダーで子パーティクルの量が同じか。
+  - **パーティクルの表示率**: ビューポートでのパーティクルの表示率が100%か。
 - **グリースペンシル**:
-  - **モディファイア**: ビューポートとレンダーでモディファイアの可視性が異なるか。
-  - **エフェクト**: ビューポートとレンダーでエフェクトの可視性が異なるか。
+  - **モディファイア**: ビューポートとレンダーでモディファイアの可視性が同じか。
+  - **エフェクト**: ビューポートとレンダーでエフェクトの可視性が同じか。
 
 プリファレンスから、全てのシーンをチェックするか、現在のシーン/ビューレイヤーのみをチェックするかも選択できます。
 
