@@ -1,7 +1,7 @@
 bl_info = {
     "name": "FinalCheck",
     "author": "Taisei Omine",
-    "version": (0, 2, 0),
+    "version": (0, 2, 1),
     "blender": (2, 90, 0),
     "location": "3D Viewport",
     "description": "This addon detects problems of your project and make your rendering more efficient",
