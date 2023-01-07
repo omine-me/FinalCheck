@@ -1,5 +1,9 @@
 # Change Log
 
+## Ver. 0.2.1 - 2023-01-07
+### Fixed
+- A bug that render image function becomes render animation function in specific condition.
+
 ## Ver. 0.2.0 - 2023-01-07
 ### Added
 - Automatic checking feature at rendering.
@@ -19,6 +23,10 @@
 ---
 
 ## 日本語版 (Japanese)
+
+## Ver. 0.2.1 - 2023-01-07
+### Fixed
+- 特定の条件で、画像のレンダーがアニメーションのレンダーになるバグを修正
 
 ## Ver. 0.2.0 - 2023-01-07
 ### Added
