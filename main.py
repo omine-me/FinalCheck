@@ -129,26 +129,26 @@ class FINALCHECK_OT_Render(bpy.types.Operator):
 
     animation: BoolProperty(
         name="animation",
-        options={"HIDDEN"},
+        options={"HIDDEN", "SKIP_SAVE"},
         default=False,
     )
     write_still: BoolProperty(
         name="write_still",
-        options={"HIDDEN"},
+        options={"HIDDEN", "SKIP_SAVE"},
         default=False,
     )
     use_viewport: BoolProperty(
         name="use_viewport",
-        options={"HIDDEN"},
+        options={"HIDDEN", "SKIP_SAVE"},
         default=False,
     )
     layer: StringProperty(
         name="layer",
-        options={"HIDDEN"},
+        options={"HIDDEN", "SKIP_SAVE"},
     )
     scene: StringProperty(
         name="scene",
-        options={"HIDDEN"},
+        options={"HIDDEN", "SKIP_SAVE"},
     )
     def execute(self, context):
         finalCheck = context.window_manager.finalCheck
