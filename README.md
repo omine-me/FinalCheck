@@ -85,6 +85,8 @@ If you find bugs or have an improvement, let me know in issues or my [Twitter](h
 Any improvement of English in UI is also appreciate as I'm not native to English.
 Thanks for using FinalCheck.
 
+Give me a [Star](https://github.com/omine-me/FinalCheck) if you like!
+
 ## License
 
 Distributed under the MIT License.
@@ -171,6 +173,7 @@ zip ファイルを展開する必要はありません。
 
 バグやご意見は、issues や[ツイッター](https://twitter.com/mineBeReal)からお願いします。
 改善案も歓迎です。
+[Star](https://github.com/omine-me/FinalCheck)をいただけると励みになります！
 
 ## ライセンス
 
