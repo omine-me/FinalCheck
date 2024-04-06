@@ -1,5 +1,9 @@
 # Change Log
 
+## Ver. 0.2.2 - 2024-04-06
+### Changed
+- Compatible with blender 4.0 or later.
+
 ## Ver. 0.2.1 - 2023-01-07
 ### Fixed
 - A bug that render image function becomes render animation function in specific condition.
@@ -23,6 +27,10 @@
 ---
 
 ## 日本語版 (Japanese)
+
+## Ver. 0.2.2 - 2024-04-06
+### Changed
+- blender 4.0以降に対応。
 
 ## Ver. 0.2.1 - 2023-01-07
 ### Fixed

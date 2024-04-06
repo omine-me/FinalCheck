@@ -64,7 +64,11 @@ class FinalCheck:
                     if not mod in modifiersDict: modifiersDict[mod] = {"hide": False}
                     modifiersDict[mod]["show_emitter"] = obj
                 settings = mod.particle_system.settings
-                if wm.finalCheck_prefs_particleChildAmount and settings.child_type != "NONE" and (settings.child_nbr != settings.rendered_child_count):
+                if (4, 0, 0) > bpy.app.version:
+                    settings_child_percent = settings.child_nbr
+                else:
+                    settings_child_percent = settings.child_percent
+                if wm.finalCheck_prefs_particleChildAmount and settings.child_type != "NONE" and (settings_child_percent != settings.rendered_child_count):
                     addToObjsDict = True
                     if not mod in modifiersDict: modifiersDict[mod] = {"hide": False}
                     modifiersDict[mod]["child_amount"] = settings

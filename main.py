@@ -157,7 +157,7 @@ class FINALCHECK_OT_Render(bpy.types.Operator):
         if finalCheck.missingFiles or finalCheck.checkedItems:
             self.report({'WARNING'}, iface_("Problems detected"))
         else:
-            bpy.ops.render.render({}, 'INVOKE_DEFAULT', True, 
+            bpy.ops.render.render('INVOKE_DEFAULT', True, 
                                     animation=self.animation,
                                     write_still=self.write_still,
                                     use_viewport=self.use_viewport,
@@ -360,7 +360,10 @@ class FINALCHECK_PT_Menu(FinalCheckPanel, bpy.types.Panel):
                                         self.separator(row, 5, 2)
                                         row.label(icon="DOT")
                                         row.label(text=iface_("Child Amount"), icon="PARTICLES")
-                                        row.prop(value["child_amount"], "child_nbr")
+                                        if (4, 0, 0) > bpy.app.version:
+                                            row.prop(value["child_amount"], "child_nbr")
+                                        else:
+                                            row.prop(value["child_amount"], "child_percent")
                                         row.prop(value["child_amount"], "rendered_child_count")
                                     if "display_percentage" in value:
                                         row = layout.row(align=True)
