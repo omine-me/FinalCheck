@@ -1,5 +1,9 @@
 # Change Log
 
+## Ver. 0.2.3 - 2025-05-08
+### Changed
+- Compatible with blender 4.3 or later.
+
 ## Ver. 0.2.2 - 2024-04-06
 ### Changed
 - Compatible with blender 4.0 or later.
@@ -27,6 +31,10 @@
 ---
 
 ## 日本語版 (Japanese)
+
+## Ver. 0.2.3 - 2025-05-08
+### Changed
+- Blender 4.3 以降に対応。
 
 ## Ver. 0.2.2 - 2024-04-06
 ### Changed
