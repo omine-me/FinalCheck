@@ -444,7 +444,8 @@ class FINALCHECK_PT_Menu_Prefs(FinalCheckPanel, bpy.types.Panel):
         box.label(text=iface_("Grease Pencil"))
         row = box.row()
         row.separator(factor=1)
-        row.prop(wm, "finalCheck_prefs_gpencilModifiers", text=self.getName(types.finalCheck_prefs_gpencilModifiers))
-        row = box.row()
-        row.separator(factor=1)
+        if (4, 3, 0) > bpy.app.version:
+            row.prop(wm, "finalCheck_prefs_gpencilModifiers", text=self.getName(types.finalCheck_prefs_gpencilModifiers))
+            row = box.row()
+            row.separator(factor=1)
         row.prop(wm, "finalCheck_prefs_gpencilShaderEffects", text=self.getName(types.finalCheck_prefs_gpencilShaderEffects))

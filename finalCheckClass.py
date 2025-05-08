@@ -87,11 +87,13 @@ class FinalCheck:
         objDict["fxs"] = fxsDict
 
         gpfxsDict = {}
-        if wm.finalCheck_prefs_gpencilModifiers:
-            for gpfx in obj.grease_pencil_modifiers:
-                if gpfx.show_render != gpfx.show_viewport:
-                    addToObjsDict = True
-                    gpfxsDict[gpfx] = {}
+        # 4.3以降 grease pencilのモディファイアは通常のモディファイアと同じように扱うので、個別対応は不要
+        if (4, 3, 0) > bpy.app.version:
+            if wm.finalCheck_prefs_gpencilModifiers:
+                for gpfx in obj.grease_pencil_modifiers:
+                    if gpfx.show_render != gpfx.show_viewport:
+                        addToObjsDict = True
+                        gpfxsDict[gpfx] = {}
         objDict["gpfxs"] = gpfxsDict
 
         if wm.finalCheck_prefs_instance and\
