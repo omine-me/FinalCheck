@@ -2,6 +2,9 @@
 
 日本語版は下にあります。/ Japanese version below.
 
+> [!NOTE]
+> As of  October 2025: Tested up to Blender 4.5.3
+
 ## NO MORE Rendering Failures!
 
 This addon detects problems in your project and make your render successful.
